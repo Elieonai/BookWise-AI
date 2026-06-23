@@ -1,47 +1,34 @@
 import { livros } from "../data/livros";
 import BookList from "../components/BookList";
 import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
 
 function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-amber-50/40">
       <Navbar />
+      <Hero />
 
-      <section className="bg-gradient-to-r from-blue-700 to-indigo-900">
-  <div className="max-w-7xl mx-auto px-6 py-16 flex items-center justify-between">
-
-    <div className="text-white max-w-xl">
-      <h1 className="text-5xl font-bold mb-4">
-        Descubra sua próxima leitura
-      </h1>
-
-      <p className="text-lg text-blue-100 mb-6">
-        Explore livros, leia avaliações e encontre
-        recomendações inteligentes para sua próxima aventura.
-      </p>
-
-      <button className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100">
-        Explorar Livros
-      </button>
-    </div>
-
-    <img
-      src="/capivara.png"
-      alt="Mascote BookWise AI"
-      className="w-72"
-    />
-
-  </div>
-</section>
+      
 
       <main className="max-w-5xl mx-auto px-6 py-10">
+
+        {/*barra de pesquisa*/}
+
         <div className="flex justify-center mb-10">
-          <input
-            type="text"
-            placeholder="Pesquise seu livro de sua escolha"
-            className="w-full max-w-md border border-gray-400 rounded-full px-5 py-2 outline-none text-sm"
-          />
+          <div className="flex items-center w-full max-w-md bg-white border border-lime-500 rounded-full px-4 py-2 shadow-sm">
+
+            <input 
+              type="text"
+              placeholder="Pesquise seu livro aqui"
+              className="flex-1 outline-none text-sm bg-transparent" />
+
+                <button className="cursor-pointer m1-2 text-lime-700 hover:text-lime-900">
+                  🔍
+                </button>
+          </div>
         </div>
+       
 
         <BookList livros={livros} />
       </main>

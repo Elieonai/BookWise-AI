@@ -1,4 +1,4 @@
-const { readReviews, writeReviews } = require('./fileService');          
+const { readReviews, writeReviews } = require('./fileService');
 
 const getAllReviews = (bookId) => {
     const reviews = readReviews();
@@ -19,11 +19,11 @@ const addReview = (reviewData) => {
 
     if (!reviewData.nota) {
         throw new Error('nota is required');
-    }   
-    
+    }
+
     if (reviewData.nota < 1 || reviewData.nota > 5) {
         throw new Error('nota must be between 1 and 5');
-    }  
+    }
 
     const newReview = {
         id: reviews.length + 1,
@@ -33,7 +33,7 @@ const addReview = (reviewData) => {
         commentario: reviewData.commentario || '',
         data: reviewData.data || new Date().toISOString()
     };
-    
+
     reviews.push(newReview);
     writeReviews(reviews);
 

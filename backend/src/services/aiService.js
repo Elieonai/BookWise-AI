@@ -27,7 +27,7 @@ const getReviews = () => {
 };
 
 const getRecommendations = async (bookTitle) => {
-    
+
     try {
         const prompt = `
         Livro: ${bookTitle}

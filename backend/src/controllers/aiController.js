@@ -1,7 +1,7 @@
 const aiService = require('../services/aiService');
 
 const getRecommendations = async (req, res) => {
-    try {   
+    try {
         const { bookTitle } = req.params;
 
         const recommendations = await aiService.getRecommendations(bookTitle);

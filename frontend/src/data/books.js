@@ -1,4 +1,4 @@
-export const livros = [
+export const books = [
   {
     id: 1,
     titulo: "Dom Casmurro",

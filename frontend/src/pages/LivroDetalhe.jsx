@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { livros } from "../data/livros";
+import { books } from "../data/books";
 import { reviews } from "../data/reviews";
 import ReviewCard from "../components/reviewCard";
 
@@ -10,7 +10,7 @@ function LivroDetalhe() {
     console.log(reviews);
     
 
-    const livro = livros.find((l) => l.id === Number(id));
+    const livro = books.find((l) => l.id === Number(id));
 
     if (!livro) {
         return (

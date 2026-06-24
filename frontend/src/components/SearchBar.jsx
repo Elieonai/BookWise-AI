@@ -1,4 +1,4 @@
-export default function SearchBar() {
+export default function SearchBar({ value, onChange}) {
     return (
 
         <div className="flex justify-center mb-10">
@@ -6,6 +6,8 @@ export default function SearchBar() {
 
             <input 
               type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
               placeholder="Pesquise seu livro aqui"
               className="flex-1 outline-none text-sm bg-transparent" />
 

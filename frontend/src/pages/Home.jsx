@@ -1,4 +1,4 @@
-import { livros } from "../data/livros";
+import { books } from "../data/books";
 import BookList from "../components/BookList";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
@@ -17,7 +17,7 @@ function Home() {
       <main className="max-w-5xl mx-auto px-6 py-10">
 
         <SearchBar />      
-        <BookList livros={livros} />
+        <BookList books={books} />
         
       </main>
 

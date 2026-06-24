@@ -15,7 +15,7 @@ export default function Navbar() {
             </li>
 
             <li>
-              <Link to="/livros" className="hover:text-lime-900">Livros</Link>
+              <Link to="/books" className="hover:text-lime-900">Livros</Link>
             </li>
 
             <li>

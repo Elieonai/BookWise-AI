@@ -3,11 +3,11 @@ import Navbar from "../components/Navbar";
 import { books } from "../data/books";
 import { reviews } from "../data/reviews";
 import ReviewCard from "../components/reviewCard";
+import Footer from "../components/Footer";
 
 function LivroDetalhe() {
     const { id } = useParams();
     const navigate = useNavigate();
-    console.log(reviews);
     
 
     const livro = books.find((l) => l.id === Number(id));
@@ -99,7 +99,7 @@ function LivroDetalhe() {
                         {
                             reviews.map((review) => {
                                 return (
-                                    <ReviewCard avaliacao={review} key={review.id}/>
+                                    <ReviewCard review={review} key={review.id}/>
                                 )
                             })
                         }
@@ -109,6 +109,10 @@ function LivroDetalhe() {
 
 
             </main>
+
+            <footer>
+                <Footer />
+            </footer>
 
         </>
     );

@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "titulo": "O Hobbit",
+        "autor": "J.R.R. Tolkien",
+        "capa": "https://covers.openlibrary.org/b/id/8406786-L.jpg",
+        "sinopse": "Bilbo Baggins, um hobbit tranquilo, é convocado pelo mago Gandalf para uma aventura inesperada com um grupo de anões rumo à Montanha Solitária."
+    },
+    {
+        "id": 2,
+        "titulo": "1984",
+        "autor": "George Orwell",
+        "capa": "https://covers.openlibrary.org/b/id/8575708-L.jpg",
+        "sinopse": "Em uma sociedade totalitária controlada pelo Grande Irmão, Winston Smith trabalha para o governo reescrevendo a história e começa a questionar o regime."
+    },
+    {
+        "id": 3,
+        "titulo": "Dom Casmurro",
+        "autor": "Machado de Assis",
+        "capa": "https://covers.openlibrary.org/b/id/8231432-L.jpg",
+        "sinopse": "Bentinho narra sua vida e seu amor por Capitu, levantando a dúvida que atravessou gerações: ela o traiu ou não?"
+    }
+]

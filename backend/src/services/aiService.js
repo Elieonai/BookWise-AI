@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -12,9 +12,7 @@ const __dirname = path.dirname(__filename);
 const booksFilePath = path.join(__dirname, "../../data/books.json");
 const reviewsFilePath = path.join(__dirname, "../../data/reviews.json");
 
-const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
+const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const getBooks = () => {
     const data = fs.readFileSync(booksFilePath, "utf-8");
@@ -44,18 +42,16 @@ const getRecommendations = async (bookTitle) => {
         ]
         `;
 
-        const response = await client.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ]
+        const response = await client.interactions.create({
+            model: "gemini-3.5-flash",
+            input: prompt,
+            response_format: {
+                mime_type: "application/json",  
+                type: "text"            
+            }
         });
 
-        const content = response.choices[0].message.content;
-
+        const content = response;
         return JSON.parse(content);
 
     } catch (error) {

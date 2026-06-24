@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function BookCard({ livro }) {
   return (
     <div className="flex gap-4 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition">
@@ -32,12 +34,10 @@ function BookCard({ livro }) {
           </span>
         </div>
 
-        <a
-          href={`/livros/${livro.id}`}
-          className="inline-block mt-3 bg-gray-200 px-4 py-2 rounded text-xs font-semibold hover:bg-gray-300"
-        >
-          Ler mais do livro
-        </a>
+        <Link 
+          to={`/livros/${livro.id}`}
+          className="inline-block mt-3 bg-lime-600 px-4 py-2 rounded text-xs font-s hover:bg-lime-700">Saiba Mais</Link>
+        
       </div>
     </div>
   );

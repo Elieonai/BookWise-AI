@@ -1,78 +1,65 @@
-import { GoogleGenAI } from "@google/genai";
-import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+require('dotenv').config();
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const fs = require('fs');
+const path = require('path');
 
-dotenv.config();
+const booksFilePath = path.join(__dirname, '../../data/books.json');
+const reviewsFilePath = path.join(__dirname, '../../data/reviews.json');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const booksFilePath = path.join(__dirname, "../../data/books.json");
-const reviewsFilePath = path.join(__dirname, "../../data/reviews.json");
-
-const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const getBooks = () => {
-    const data = fs.readFileSync(booksFilePath, "utf-8");
+    const data = fs.readFileSync(booksFilePath, 'utf-8');
     return JSON.parse(data);
 };
 
 const getReviews = () => {
-    const data = fs.readFileSync(reviewsFilePath, "utf-8");
+    const data = fs.readFileSync(reviewsFilePath, 'utf-8');
     return JSON.parse(data).reviews;
 };
 
 const getRecommendations = async (bookTitle) => {
-
     try {
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
         const prompt = `
-        Livro: ${bookTitle}
-
-        Recomende 3 livros similares.
-        Retorne APENAS JSON:
-
-        [
-        {
-            "livro": "",
-            "autor": "",
-            "sinopse": ""
-        }
-        ]
+            Você é um especialista em literatura.
+            Retorne EXCLUSIVAMENTE um array JSON, sem crases markdown, sem texto adicional.
+            O array deve seguir ESTRITAMENTE esta estrutura:
+            [
+                {
+                    "livro": "Título do livro",
+                    "autor": "Nome do autor",
+                    "sinopse": "Breve descrição do livro"
+                }
+            ]
+            Recomende 3 livros similares a: "${bookTitle}"
         `;
 
-        const response = await client.interactions.create({
-            model: "gemini-3.5-flash",
-            input: prompt,
-            response_format: {
-                mime_type: "application/json",  
-                type: "text"            
-            }
-        });
+        const respostaBruta = await model.generateContent(prompt);
+        const textoDaResposta = respostaBruta.response.text();
 
-        const content = response;
-        return JSON.parse(content);
+        const stringJsonLimpa = textoDaResposta
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim();
+
+        return JSON.parse(stringJsonLimpa);
 
     } catch (error) {
-        console.error("Erro OpenAI:", error);
+        console.error('Erro Gemini:', error);
         return getFallbackRecommendations();
     }
 };
 
 const getTopRatedBooks = () => {
     const reviews = getReviews();
-
     const grouped = {};
 
     for (const review of reviews) {
         if (!grouped[review.bookId]) {
-            grouped[review.bookId] = {
-                total: 0,
-                count: 0
-            };
+            grouped[review.bookId] = { total: 0, count: 0 };
         }
-
         grouped[review.bookId].total += review.nota;
         grouped[review.bookId].count += 1;
     }
@@ -91,27 +78,15 @@ const getFallbackRecommendations = () => {
 
     if (ranked.length > 0) {
         return ranked.slice(0, 3).map(rank => {
-            const book = books.find(
-                b => b.id === rank.bookId
-            );
-
-            return {
-                livro: book?.titulo,
-                autor: book?.autor,
-                sinopse: book?.sinopse
-            };
+            const book = books.find(b => b.id === rank.bookId);
+            return { livro: book?.titulo, autor: book?.autor, sinopse: book?.descricao };
         });
     }
 
-    const randomBooks = [...books]
+    return [...books]
         .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
-
-    return randomBooks.map(book => ({
-        livro: book.titulo,
-        autor: book.autor,
-        sinopse: book.sinopse
-    }));
+        .slice(0, 3)
+        .map(book => ({ livro: book.titulo, autor: book.autor, sinopse: book.descricao }));
 };
 
-export { getRecommendations };
+module.exports = { getRecommendations };

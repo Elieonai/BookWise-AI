@@ -29,9 +29,9 @@ const addReview = (reviewData) => {
         id: reviews.length + 1,
         bookId: Number(reviewData.bookId),
         nome: reviewData.nome,
+        comentario: reviewData.comentario || '',
         nota: reviewData.nota,
-        commentario: reviewData.commentario || '',
-        data: reviewData.data || new Date().toISOString()
+        foto: reviewData.foto
     };
 
     reviews.push(newReview);

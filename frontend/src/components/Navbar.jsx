@@ -1,4 +1,6 @@
-function Navbar() {
+import { Link } from "react-router-dom";
+
+export default function Navbar() {
   return (
     <header className="bg-lime-800/75 text-white shadow">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -8,16 +10,16 @@ function Navbar() {
 
         <nav>
           <ul className="flex gap-6">
-            <li className="cursor-pointer hover:text-lime-900">
-              Início
+            <li>
+              <Link to="/" className="hover:text-lime-900">Início</Link>
             </li>
 
-            <li className="cursor-pointer hover:text-lime-900">
-              Livros
+            <li>
+              <Link to="/books" className="hover:text-lime-900">Livros</Link>
             </li>
 
-            <li className="cursor-pointer hover:text-lime-900">
-              Reviews
+            <li>
+              <Link to="/reviews" className="hover:text-lime-900">Resenhas</Link>
             </li>
           </ul>
         </nav>
@@ -25,5 +27,3 @@ function Navbar() {
     </header>
   );
 }
-
-export default Navbar;

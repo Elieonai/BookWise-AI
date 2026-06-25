@@ -3,18 +3,49 @@
     {
       "id": 1,
       "bookId": 1,
-      "nome": "John Doe",
+      "nome": "Clarice Lispector",
+      "comentario": "Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia.",
       "nota": 5,
-      "commentario": "Great book!",
-      "data": "2024-06-01T12:00:00"
+      "foto": null
     },
     {
       "id": 2,
       "bookId": 1,
-      "nome": "John Doe",
+      "nome": "João Lispector",
+      "comentario": "Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia. Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia. Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia. Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia.",
       "nota": 5,
-      "commentario": "Livro muito bom!",
-      "data": "2024-06-23T12:00:00"
+      "foto": null
+    },
+    {
+      "id": 3,
+      "bookId": 2,
+      "nome": "João Lispector",
+      "comentario": "Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia. Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia. Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia. Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia.",
+      "nota": 4.5,
+      "foto": null
+    },
+    {
+      "id": 4,
+      "bookId": 2,
+      "nome": "Clarice Lispector",
+      "comentario": "Eu achei este livro muito bom, recomendo demais para quem gosta de coisas de fantasia.",
+      "nota": 4.1,
+      "foto": null
+    },
+    {
+      "id": 5,
+      "bookId": 1,
+      "nome": "Clarice",
+      "comentario": "Eu achei este livro muito bom.",
+      "nota": 5,
+      "foto": null
+    },
+    {
+      "id": 6,
+      "bookId": 4,
+      "nome": "Vitor",
+      "comentario": "Bom livro",
+      "nota": 4
     }
   ]
 }

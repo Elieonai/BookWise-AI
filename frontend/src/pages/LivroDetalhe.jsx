@@ -1,33 +1,52 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { books } from "../data/books";
-import { reviews } from "../data/reviews";
 import ReviewCard from "../components/reviewCard";
 import Footer from "../components/Footer";
+import { getBookById } from "../services/booksService";
 
 function LivroDetalhe() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [modalAberto, setModalAberto] = useState(false);
 
+    const [livro, setLivro] = useState(null);
+    const [reviews, setReviews] = useState([]);
+    const [recomendacoes, setRecomendacoes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const [nome, setNome] = useState("");
     const [comentario, setComentario] = useState("");
     const [nota, setNota] = useState("");
-    const [novasAvaliacoes, setNovasAvaliacoes] = useState([]);
-
-    const livro = books.find((l) => l.id === Number(id));
 
     useEffect(() => {
-        if (livro) {
-            const avaliacoesSalvas =
-                JSON.parse(localStorage.getItem(`avaliacoes-livro-${livro.id}`)) || [];
+        async function loadData() {
+            try {
+                setLoading(true);
 
-            setNovasAvaliacoes(avaliacoesSalvas);
+                const livroData = await getBookById(id);
+                setLivro(livroData);
+
+                const reviewsRes = await fetch(`/api/reviews/${id}`);
+                const reviewsData = await reviewsRes.json();
+                setReviews(reviewsData);
+
+                const aiRes = await fetch(`/api/ai/recommendations/${encodeURIComponent(livroData.titulo)}`);
+                const aiData = await aiRes.json();
+                setRecomendacoes(aiData);
+
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
         }
-    }, [livro]);
 
-    function postarAvaliacao(e) {
+        loadData();
+    }, [id]);
+
+    async function postarAvaliacao(e) {
         e.preventDefault();
 
         if (!nome.trim() || !comentario.trim() || !nota.trim()) {
@@ -40,60 +59,34 @@ function LivroDetalhe() {
             return;
         }
 
-        const novaAvaliacao = {
-            id: Date.now(),
-            bookId: livro.id,
+        try {
+            const response = await fetch('/api/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookId: Number(id),
+                    nome,
+                    comentario,
+                    nota: Number(nota)
+                })
+            });
 
-            // nomes que seu ReviewCard pode usar
-            nome: nome,
-            comentario: comentario,
-            nota: Number(nota),
+            const novaReview = await response.json();
+            setReviews(prev => [...prev, novaReview]);
 
-            // nomes alternativos, caso o ReviewCard use inglês
-            name: nome,
-            comment: comentario,
-            rating: Number(nota),
-        };
+            setNome("");
+            setComentario("");
+            setNota("");
+            setModalAberto(false);
 
-        const avaliacoesAtualizadas = [...novasAvaliacoes, novaAvaliacao];
-
-        setNovasAvaliacoes(avaliacoesAtualizadas);
-
-        localStorage.setItem(
-            `avaliacoes-livro-${livro.id}`,
-            JSON.stringify(avaliacoesAtualizadas)
-        );
-
-        setNome("");
-        setComentario("");
-        setNota("");
-        setModalAberto(false);
+        } catch (err) {
+            alert("Erro ao postar avaliação!");
+        }
     }
 
-    if (!livro) {
-        return (
-            <>
-                <header>
-                    <Navbar />
-                </header>
-
-                <main className="flex flex-col items-center justify-center min-h-screen gap-4">
-                    <p className="text-2xl text-gray-500">Livro não encontrado.</p>
-
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="text-blue-600 underline hover:text-blue-800"
-                    >
-                        Voltar
-                    </button>
-                </main>
-            </>
-        );
-    }
-
-    const reviewsDoLivro = reviews.filter((review) => review.bookId === livro.id);
-
-    const todasReviewsDoLivro = [...reviewsDoLivro, ...novasAvaliacoes];
+    if (loading) return <p className="text-center mt-10 text-gray-500">Carregando...</p>;
+    if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
+    if (!livro) return <p className="text-center mt-10 text-gray-500">Livro não encontrado.</p>;
 
     return (
         <>
@@ -104,13 +97,11 @@ function LivroDetalhe() {
             <main className="max-w-5xl mx-auto px-6 py-10">
                 <section className="mb-10">
                     <div className="flex flex-wrap gap-10">
-                        <div>
-                            <img
-                                src={livro.capa}
-                                alt={`Capa do livro ${livro.titulo}`}
-                                className="w-64 h-100 rounded-md shadow-md object-cover"
-                            />
-                        </div>
+                        <img
+                            src={livro.capa}
+                            alt={`Capa do livro ${livro.titulo}`}
+                            className="w-64 h-100 rounded-md shadow-md object-cover"
+                        />
 
                         <div className="flex flex-col gap-4 flex-1">
                             <h1 className="text-5xl leading-tight">{livro.titulo}</h1>
@@ -118,9 +109,7 @@ function LivroDetalhe() {
                             <dl className="flex flex-col gap-2 text-lg">
                                 <div className="flex items-center gap-2">
                                     <dt className="font-semibold">Avaliação:</dt>
-                                    <dd className="flex gap-0.5 text-sm">
-                                        {"⭐".repeat(livro.avaliacao)}
-                                    </dd>
+                                    <dd>{"⭐".repeat(livro.avaliacao ?? 0)}</dd>
                                 </div>
 
                                 <div>
@@ -134,14 +123,9 @@ function LivroDetalhe() {
                                 </div>
 
                                 <div>
-                                    <dt className="font-semibold inline">Editora: </dt>
-                                    <dd className="inline">{livro.autor}</dd>
-                                </div>
-
-                                <div>
                                     <dt className="font-semibold inline">Sinopse: </dt>
                                     <dd className="text-gray-700 mt-1 ml-1 leading-relaxed inline">
-                                        {livro.descricao}
+                                        {livro.descricao ?? livro.sinopse}
                                     </dd>
                                 </div>
                             </dl>
@@ -149,35 +133,50 @@ function LivroDetalhe() {
                     </div>
                 </section>
 
+                {/* Recomendações da IA */}
+                {recomendacoes.length > 0 && (
+                    <section className="mb-10">
+                        <h2 className="text-2xl font-bold mb-4">✨ Gostou deste? A IA recomenda...</h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {recomendacoes.map((rec, index) => (
+                                <div key={index} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                    <p className="font-bold text-sm">{rec.livro}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{rec.autor}</p>
+                                    <p className="text-xs text-gray-700 mt-2">{rec.sinopse}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Reviews */}
                 <section>
                     <h2 className="text-4xl">Resenhas da comunidade</h2>
 
-                    <div>
-                        <button
-                            type="button"
-                            onClick={() => setModalAberto(true)}
-                            className="bg-blue-600 hover:bg-blue-800 text-white text-sm px-5 py-2 rounded-lg transition-colors duration-150 cursor-pointer font-bold mt-5"
-                        >
-                            Avaliar livro
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setModalAberto(true)}
+                        className="bg-blue-600 hover:bg-blue-800 text-white text-sm px-5 py-2 rounded-lg transition-colors duration-150 cursor-pointer font-bold mt-5"
+                    >
+                        Avaliar livro
+                    </button>
 
                     <div>
-                        {todasReviewsDoLivro.length > 0 ? (
-                            todasReviewsDoLivro.map((review) => (
+                        {reviews.length > 0 ? (
+                            reviews.map((review) => (
                                 <ReviewCard review={review} key={review.id} />
                             ))
                         ) : (
-                            <p className="text-gray-500 mt-5">
-                                Ainda não há resenhas para este livro.
-                            </p>
+                            <p className="text-gray-500 mt-5">Ainda não há resenhas para este livro.</p>
                         )}
                     </div>
                 </section>
 
+                {/* Modal */}
                 {modalAberto && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-xl shadow-xl w-[400px] relative">
+                        <div className="bg-white p-6 rounded-xl shadow-xl w-100 relative">
                             <button
                                 type="button"
                                 onClick={() => setModalAberto(false)}
@@ -186,18 +185,11 @@ function LivroDetalhe() {
                                 ×
                             </button>
 
-                            <h2 className="text-2xl font-bold mb-1">
-                                Avaliação do Livro
-                            </h2>
-
-                            <p className="text-gray-600 mb-4">
-                                {livro.titulo}
-                            </p>
+                            <h2 className="text-2xl font-bold mb-1">Avaliação do Livro</h2>
+                            <p className="text-gray-600 mb-4">{livro.titulo}</p>
 
                             <form onSubmit={postarAvaliacao} className="flex flex-col gap-3">
-                                <label className="text-sm font-semibold">
-                                    Nome:
-                                </label>
+                                <label className="text-sm font-semibold">Nome:</label>
                                 <input
                                     type="text"
                                     placeholder="Escreva seu nome"
@@ -206,9 +198,7 @@ function LivroDetalhe() {
                                     className="border rounded-lg p-2"
                                 />
 
-                                <label className="text-sm font-semibold">
-                                    Comentário do livro:
-                                </label>
+                                <label className="text-sm font-semibold">Comentário do livro:</label>
                                 <textarea
                                     placeholder="Escreva seu comentário"
                                     rows="4"
@@ -217,9 +207,7 @@ function LivroDetalhe() {
                                     className="border rounded-lg p-2"
                                 />
 
-                                <label className="text-sm font-semibold">
-                                    Nota do livro:
-                                </label>
+                                <label className="text-sm font-semibold">Nota do livro:</label>
                                 <input
                                     type="number"
                                     min="0"

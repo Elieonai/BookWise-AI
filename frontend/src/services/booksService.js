@@ -1,24 +1,21 @@
-{/*Simulação com o Backend*/}
-import { books } from "../data/books";
+{/*chamada do backend*/ }
 
 export async function getBooks() {
-
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(books);
-        }, 300); //simula delay de API
-    });    
-}
-
-
-{/*chamada do backend*/}
-
-{/*export async function getLivros() {
-    const response = await fetch("http://localhost:3000/books");
+    const response = await fetch("/api/books");
 
     if (!response.ok) {
-        throw new Error ("Ops! Livro não encontrado!");
+        throw new Error("Ops! Livro não encontrado!");
     }
 
     return response.json();
-}*/}
+}
+
+export async function getBookById(id) {
+    const response = await fetch(`/api/books/${id}`);
+
+    if (!response.ok) {
+        throw new Error("Ops! Livro não encontrado!");
+    }
+
+    return response.json();
+}

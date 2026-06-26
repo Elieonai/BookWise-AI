@@ -1,4 +1,4 @@
-# BookWise AI
+# Capiventure AI
 
 Plataforma colaborativa de reviews de livros com recomendações inteligentes utilizando IA desenvolvida como projeto final do Bootcamp Full Stack da SoulCode Academy com a Accenture.
 
@@ -91,6 +91,13 @@ Rotas montadas pelo backend Express:
 |  POST  | `/api/ai/semantic-search`             | Busca semântica no catálogo com Gemini/fallback |
 
 As rotas `/api/ai/*` têm limite simples de requisições para proteger a quota da Gemini. Livros e reviews continuam sendo acessados diretamente pelo frontend via Firestore, mas as rotas legadas permanecem documentadas e testadas para compatibilidade.
+
+
+| Método | Endpoint                              | Descrição                            |
+| :----: | ------------------------------------- | ------------------------------------ |
+|   GET  | `/api/ai/recommendations/:bookTitulo` | Recomenda livros baseados no título  |
+|   GET  | `/api/ai/reviews-summary/:bookId`     | Faz um resumo das reviews de um livro|
+|  POST  | `/api/ai/semantic-search`             | Faz uma pesquisa semântica nos livros|
 
 ## Equipe
 

@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect, use } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import ReviewCard from "../components/ReviewCard";
 import Footer from "../components/Footer";
 import { getBookById } from "../services/booksService";
 import { getRecommendations } from "../services/recommendationsService";
 import { addReview, getReviews } from "../services/reviewsService";
+import ResumeCard from "../components/ResumeCard";
 
 function LivroDetalhe() {
     const { id } = useParams();
@@ -15,6 +16,7 @@ function LivroDetalhe() {
     const [loadingRecomendacao, setLoadingRecomendacao] = useState(false);
 
     const [livro, setLivro] = useState(null);
+    const [resume, setResume] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [recomendacoes, setRecomendacoes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -100,6 +102,7 @@ function LivroDetalhe() {
         }
     }
 
+
     if (loading) return <p className="text-center mt-10 text-gray-500">Carregando...</p>;
     if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
     if (!livro) return <p className="text-center mt-10 text-gray-500">Livro não encontrado.</p>;
@@ -183,6 +186,8 @@ function LivroDetalhe() {
                     <h2 className="text-4xl">Resenhas da comunidade</h2>
 
                     {/* RESUMO DE REVIEWS */}
+                    <ResumeCard livro={livro.titulo} resumo={resume} />
+
                     <button
                         type="button"
                         onClick={() => setModalAberto(true)}

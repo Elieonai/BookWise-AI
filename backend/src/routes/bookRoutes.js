@@ -1,5 +1,5 @@
-const router = require('express').Router();
-const controller = require('../controllers/bookController');
+const router = require("express").Router();
+const controller = require("../controllers/bookController");
 
 /* Rota legado para ranking de livros por reviews. */
 router.get('/books/top-rated', controller.getTopRatedBooks);

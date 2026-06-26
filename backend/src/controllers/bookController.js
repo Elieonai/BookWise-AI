@@ -45,6 +45,20 @@ const getTopRatedBooks = async (req, res) => {
     }
 };
 
+const getTopRatedBooks = (req, res) => {
+  try {
+    const limit = req.query.limit || 6;
+
+    const books = bookService.getTopRatedBooks(Number(limit));
+
+    res.status(200).json(books);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
     getAllBooks,
     getBookById,

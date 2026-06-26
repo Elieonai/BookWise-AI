@@ -47,7 +47,7 @@ export default function Hero({ onVerMais }) {
             <button className="bg-lime-700 hover:bg-lime-800 text-white px-6 py-3 rounded-lg transition">
             <a
               href="#top-rated-books"
-              
+
             >
               Ver Mais Avaliados
             </a>

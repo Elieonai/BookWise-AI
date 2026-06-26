@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /books/{bookId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if
+        request.resource.data.keys().hasOnly(['bookId', 'nome', 'comentario', 'nota', 'foto', 'createdAt']) &&
+        request.resource.data.bookId is number &&
+        request.resource.data.nome is string &&
+        request.resource.data.nome.size() > 0 &&
+        request.resource.data.nome.size() <= 80 &&
+        request.resource.data.comentario is string &&
+        request.resource.data.comentario.size() <= 1000 &&
+        request.resource.data.nota is number &&
+        request.resource.data.nota >= 1 &&
+        request.resource.data.nota <= 5;
+      allow update, delete: if false;
+    }
+  }
+}

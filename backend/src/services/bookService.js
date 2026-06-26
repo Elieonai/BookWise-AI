@@ -1,70 +1,85 @@
-const { readBooks } = require("./bookFileService");
-const { readReviews } = require("./fileService");
+const { db } = require('../config/firebase');
+const {
+    collection,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    where
+} = require('firebase/firestore');
+const { parsePositiveInt } = require('../utils/validation');
 
-const calcularMediaAvaliacoes = (bookId) => {
-  const reviews = readReviews();
+const booksCollection = collection(db, 'books');
+const reviewsCollection = collection(db, 'reviews');
 
-  const reviewsDoLivro = reviews.filter(
-    (review) => review.bookId === Number(bookId)
-  );
+/* Converte documento do Firestore para o formato usado pela API. */
+const mapBookDocument = (doc) => ({
+    firestoreId: doc.id,
+    ...doc.data()
+});
 
-  if (reviewsDoLivro.length === 0) {
-    return {
-      avaliacao: 0,
-      totalAvaliacoes: 0,
-    };
-  }
+/* Lista livros diretamente da colecao books no Firestore. */
+const getAllBooks = async () => {
+    const snapshot = await getDocs(query(booksCollection, orderBy('id')));
 
-  const somaNotas = reviewsDoLivro.reduce((total, review) => {
-    return total + Number(review.nota);
-  }, 0);
-
-  const media = somaNotas / reviewsDoLivro.length;
-
-  return {
-    avaliacao: Number(media.toFixed(1)),
-    totalAvaliacoes: reviewsDoLivro.length,
-  };
+    return snapshot.docs.map(mapBookDocument);
 };
 
-const adicionarAvaliacaoAoLivro = (book) => {
-  const dadosAvaliacao = calcularMediaAvaliacoes(book.id);
+/* Busca um livro pelo campo numerico id. */
+const getBookById = async (id) => {
+    const bookId = parsePositiveInt(id, 'id');
+    const snapshot = await getDocs(query(
+        booksCollection,
+        where('id', '==', bookId),
+        limit(1)
+    ));
 
-  return {
-    ...book,
-    avaliacao: dadosAvaliacao.avaliacao,
-    totalAvaliacoes: dadosAvaliacao.totalAvaliacoes,
-  };
+    if (snapshot.empty) {
+        throw new Error('Livro não encontrado');
+    }
+
+    return mapBookDocument(snapshot.docs[0]);
 };
 
-const getAllBooks = () => {
-  const books = readBooks();
+/* Lista livros com media calculada a partir das reviews do Firestore. */
+const getTopRatedBooks = async (limitCount = 6) => {
+    const safeLimit = parsePositiveInt(limitCount, 'limit');
+    const [books, reviewsSnapshot] = await Promise.all([
+        getAllBooks(),
+        getDocs(reviewsCollection)
+    ]);
+    const reviews = reviewsSnapshot.docs.map(doc => doc.data());
+    const ratingsByBook = reviews.reduce((acc, review) => {
+        const bookId = Number(review.bookId);
 
-  return books.map((book) => adicionarAvaliacaoAoLivro(book));
-};
+        if (!acc[bookId]) {
+            acc[bookId] = { total: 0, count: 0 };
+        }
 
-const getBookById = (id) => {
-  const books = readBooks();
-  const book = books.find((book) => book.id === Number(id));
+        acc[bookId].total += Number(review.nota);
+        acc[bookId].count += 1;
 
-  if (!book) {
-    throw new Error("Livro não encontrado");
-  }
+        return acc;
+    }, {});
 
-  return adicionarAvaliacaoAoLivro(book);
-};
+    return books
+        .map(book => {
+            const rating = ratingsByBook[Number(book.id)] || { total: 0, count: 0 };
+            const average = rating.count ? rating.total / rating.count : 0;
 
-const getTopRatedBooks = (limit = 6) => {
-  const books = getAllBooks();
-
-  return books
-    .filter((book) => book.totalAvaliacoes > 0)
-    .sort((a, b) => b.avaliacao - a.avaliacao)
-    .slice(0, limit);
+            return {
+                ...book,
+                avaliacao: Number(average.toFixed(1)),
+                totalAvaliacoes: rating.count
+            };
+        })
+        .filter((book) => book.totalAvaliacoes > 0)
+        .sort((a, b) => b.avaliacao - a.avaliacao)
+        .slice(0, safeLimit);
 };
 
 module.exports = {
-  getAllBooks,
-  getBookById,
-  getTopRatedBooks,
+    getAllBooks,
+    getBookById,
+    getTopRatedBooks
 };

@@ -1,37 +1,48 @@
 const bookService = require('../services/bookService');
+const { parsePositiveInt } = require('../utils/validation');
 
-const getAllBooks = (req, res) => {
+const sendError = (res, status, message) => res.status(status).json({
+    success: false,
+    error: { message }
+});
+
+/* Retorna todos os livros cadastrados no Firestore. */
+const getAllBooks = async (req, res) => {
     try {
-        const books = bookService.getAllBooks();
-        res.json(books);
+        const books = await bookService.getAllBooks();
+        res.status(200).json(books);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Erro ao listar livros:', error);
+        sendError(res, 500, 'Não foi possível listar os livros.');
     }
 };
 
-const getBookById = (req, res) => {
+/* Retorna um livro pelo id numerico informado na rota. */
+const getBookById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const book = bookService.getBookById(id);
-        res.json(book);
+        const bookId = parsePositiveInt(id, 'id');
+        const book = await bookService.getBookById(bookId);
+        res.status(200).json(book);
     } catch (error) {
-        res.status(404).json({ error: error.message });
+        console.error('Erro ao buscar livro:', error);
+        sendError(res, 404, 'Livro não encontrado.');
     }
 };
 
-const getTopRatedBooks = (req, res) => {
-  try {
-    const limit = req.query.limit || 6;
+/* Retorna os livros com melhor media baseada nas reviews. */
+const getTopRatedBooks = async (req, res) => {
+    try {
+        const limit = req.query.limit ? parsePositiveInt(req.query.limit, 'limit') : 6;
 
-    const books = bookService.getTopRatedBooks(Number(limit));
+        const books = await bookService.getTopRatedBooks(limit);
 
-    res.status(200).json(books);
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
-  }
+        res.status(200).json(books);
+    } catch (error) {
+        console.error('Erro ao listar livros mais avaliados:', error);
+        sendError(res, 400, 'Não foi possível listar os livros mais avaliados.');
+    }
 };
 
 module.exports = {

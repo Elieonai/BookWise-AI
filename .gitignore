@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
 *.local
 
 # Editor directories and files
@@ -23,3 +24,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+serviceAccountKey.json
+*service-account*.json
+*serviceAccount*.json
+backend/credentials/

@@ -25,7 +25,35 @@ const getReviewSummary = async (req, res) => {
     }
 };
 
+const semanticSearchBooks = async (req, res) => {
+    try {
+        const { query } = req.body;
+
+        if (!query || query.trim().length < 2) {
+            return res.status(400).json({
+                type: "empty",
+                results: [],
+                message: "O campo query é obrigatório."
+            });
+        }
+
+        const response = await aiService.semanticSearchBooks(query);
+
+        return res.status(200).json(response);
+
+    } catch (error) {
+        console.error("Erro na busca semântica:", error);
+
+        return res.status(500).json({
+            type: "error",
+            results: [],
+            message: "Não foi possível realizar a busca."
+        });
+    }
+};
+
 module.exports = {
     getRecommendations,
-    getReviewSummary
+    getReviewSummary,
+    semanticSearchBooks
 };

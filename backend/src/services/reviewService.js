@@ -1,14 +1,30 @@
-const { readReviews, writeReviews } = require('./fileService');
+const { db } = require('../config/firebase');
+const {
+    addDoc,
+    collection,
+    getDocs,
+    query,
+    serverTimestamp,
+    where
+} = require('firebase/firestore');
 
-const getAllReviews = (bookId) => {
-    const reviews = readReviews();
+const reviewsCollection = collection(db, 'reviews');
 
-    return reviews.filter(review => review.bookId === Number(bookId));
+const mapReviewDocument = (doc) => ({
+    id: doc.id,
+    ...doc.data()
+});
+
+const getAllReviews = async (bookId) => {
+    const snapshot = await getDocs(query(
+        reviewsCollection,
+        where('bookId', '==', Number(bookId))
+    ));
+
+    return snapshot.docs.map(mapReviewDocument);
 };
 
-const addReview = (reviewData) => {
-    const reviews = readReviews();
-
+const addReview = async (reviewData) => {
     if (!reviewData.bookId) {
         throw new Error('bookId is required');
     }
@@ -26,18 +42,21 @@ const addReview = (reviewData) => {
     }
 
     const newReview = {
-        id: reviews.length + 1,
         bookId: Number(reviewData.bookId),
         nome: reviewData.nome,
         comentario: reviewData.comentario || '',
-        nota: reviewData.nota,
-        foto: reviewData.foto
+        nota: Number(reviewData.nota),
+        foto: reviewData.foto || null,
+        createdAt: serverTimestamp()
     };
 
-    reviews.push(newReview);
-    writeReviews(reviews);
+    const docRef = await addDoc(reviewsCollection, newReview);
 
-    return newReview;
+    return {
+        id: docRef.id,
+        ...newReview,
+        createdAt: new Date().toISOString()
+    };
 };
 
 module.exports = {

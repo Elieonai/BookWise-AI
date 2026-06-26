@@ -1,18 +1,38 @@
-const { readBooks } = require('./bookFileService');
+const { db } = require('../config/firebase');
+const {
+    collection,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    where
+} = require('firebase/firestore');
 
-const getAllBooks = () => {
-    return readBooks();
+const booksCollection = collection(db, 'books');
+
+const mapBookDocument = (doc) => ({
+    firestoreId: doc.id,
+    ...doc.data()
+});
+
+const getAllBooks = async () => {
+    const snapshot = await getDocs(query(booksCollection, orderBy('id')));
+
+    return snapshot.docs.map(mapBookDocument);
 };
 
-const getBookById = (id) => {
-    const books = readBooks();
-    const book = books.find(book => book.id === Number(id));
+const getBookById = async (id) => {
+    const snapshot = await getDocs(query(
+        booksCollection,
+        where('id', '==', Number(id)),
+        limit(1)
+    ));
 
-    if (!book) {
+    if (snapshot.empty) {
         throw new Error('Livro não encontrado');
     }
 
-    return book;
+    return mapBookDocument(snapshot.docs[0]);
 };
 
 module.exports = {

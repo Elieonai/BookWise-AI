@@ -1,22 +1,10 @@
 require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const fs = require('fs');
-const path = require('path');
-
-const booksFilePath = path.join(__dirname, '../../data/books.json');
-const reviewsFilePath = path.join(__dirname, '../../data/reviews.json');
+const { db } = require('../config/firebase');
+const { collection, getDocs } = require('firebase/firestore');
+const bookService = require('./bookService');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const getBooks = () => {
-    const data = fs.readFileSync(booksFilePath, 'utf-8');
-    return JSON.parse(data);
-};
-
-const getReviews = () => {
-    const data = fs.readFileSync(reviewsFilePath, 'utf-8');
-    return JSON.parse(data).reviews;
-};
 
 const getRecommendations = async (bookTitle) => {
     try {
@@ -52,8 +40,14 @@ const getRecommendations = async (bookTitle) => {
     }
 };
 
-const getTopRatedBooks = () => {
-    const reviews = getReviews();
+const getAllReviews = async () => {
+    const snapshot = await getDocs(collection(db, 'reviews'));
+
+    return snapshot.docs.map(doc => doc.data());
+};
+
+const getTopRatedBooks = async () => {
+    const reviews = await getAllReviews();
     const grouped = {};
 
     for (const review of reviews) {
@@ -72,9 +66,9 @@ const getTopRatedBooks = () => {
         .sort((a, b) => b.avg - a.avg);
 };
 
-const getFallbackRecommendations = () => {
-    const ranked = getTopRatedBooks();
-    const books = getBooks();
+const getFallbackRecommendations = async () => {
+    const ranked = await getTopRatedBooks();
+    const books = await bookService.getAllBooks();
 
     if (ranked.length > 0) {
         return ranked.slice(0, 3).map(rank => {

@@ -18,12 +18,19 @@ const mapReviewDocument = (doc) => ({
 
 export async function getReviews(bookId) {
     const reviewsQuery = bookId
-        ? query(reviewsCollection, where("bookId", "==", Number(bookId)), orderBy("createdAt", "desc"))
+        ? query(reviewsCollection, where("bookId", "==", Number(bookId)))
         : query(reviewsCollection, orderBy("createdAt", "desc"));
 
     const snapshot = await getDocs(reviewsQuery);
 
-    return snapshot.docs.map(mapReviewDocument);
+    return snapshot.docs
+        .map(mapReviewDocument)
+        .sort((firstReview, secondReview) => {
+            const firstDate = firstReview.createdAt?.toMillis?.() ?? 0;
+            const secondDate = secondReview.createdAt?.toMillis?.() ?? 0;
+
+            return secondDate - firstDate;
+        });
 }
 
 export async function addReview(reviewData) {

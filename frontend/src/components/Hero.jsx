@@ -3,7 +3,7 @@ export default function Hero({ onVerMais }) {
   return (
     <section className="relative min-h-[400px] overflow-hidden">
 
-      {/* FUNDO /}
+      {/* FUNDO */}
       <div className="absolute inset-0">
         <img
           src="/banner2.png"
@@ -12,7 +12,7 @@ export default function Hero({ onVerMais }) {
         />
       </div>
 
-      {/ CAPIVARA (camada flutuante) /}
+      {/* CAPIVARA (camada flutuante) */}
       <img
         src="/capivara-semfundo.png"
         alt="Capivara"
@@ -23,7 +23,7 @@ export default function Hero({ onVerMais }) {
         "
       />
 
-      {/ CONTEÚDO */}
+      {/* CONTEÚDO */}
       <div className="relative max-w-7xl mx-auto px-6 py-16 pr-0 lg:pr-[380px">
         <div className="max-w-md lg:max-w-xl">
 

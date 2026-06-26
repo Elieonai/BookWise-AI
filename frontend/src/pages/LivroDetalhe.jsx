@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import ReviewCard from "../components/reviewCard";
+import ReviewCard from "../components/ReviewCard";
 import Footer from "../components/Footer";
 import { getBookById } from "../services/booksService";
+import { buildApiUrl } from "../services/apiClient";
 
 function LivroDetalhe() {
     const { id } = useParams();
@@ -28,11 +29,11 @@ function LivroDetalhe() {
                 const livroData = await getBookById(id);
                 setLivro(livroData);
 
-                const reviewsRes = await fetch(`/api/reviews/${id}`);
+                const reviewsRes = await fetch(buildApiUrl(`/reviews/${id}`));
                 const reviewsData = await reviewsRes.json();
                 setReviews(reviewsData);
 
-                const aiRes = await fetch(`/api/ai/recommendations/${encodeURIComponent(livroData.titulo)}`);
+                const aiRes = await fetch(buildApiUrl(`/ai/recommendations/${encodeURIComponent(livroData.titulo)}`));
                 const aiData = await aiRes.json();
                 setRecomendacoes(aiData);
 
@@ -60,7 +61,7 @@ function LivroDetalhe() {
         }
 
         try {
-            const response = await fetch('/api/reviews', {
+            const response = await fetch(buildApiUrl('/reviews'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -79,7 +80,7 @@ function LivroDetalhe() {
             setNota("");
             setModalAberto(false);
 
-        } catch (err) {
+        } catch {
             alert("Erro ao postar avaliação!");
         }
     }

@@ -34,5 +34,149 @@
     "descricao": "Uma obra sobre vigilância, controle social e manipulação da verdade em uma sociedade autoritária.",
     "avaliacao": 4.9,
     "capa": "https://m.media-amazon.com/images/I/71kxa1-0mfL._SY466_.jpg"
+  },
+  {
+    "id": 5,
+    "titulo": "O Hobbit",
+    "autor": "J. R. R. Tolkien",
+    "genero": "Fantasia",
+    "descricao": "Bilbo Bolseiro embarca em uma aventura inesperada para ajudar um grupo de anões a recuperar seu reino.",
+    "avaliacao": 4.9,
+    "capa": "https://m.media-amazon.com/images/I/91M9xPIf10L.jpg"
+  },
+  {
+    "id": 6,
+    "titulo": "Harry Potter e a Pedra Filosofal",
+    "autor": "J. K. Rowling",
+    "genero": "Fantasia",
+    "descricao": "Um garoto descobre que é um bruxo e inicia seus estudos em Hogwarts, onde vive grandes aventuras.",
+    "avaliacao": 4.9,
+    "capa": "https://m.media-amazon.com/images/I/81YOuOGFCJL.jpg"
+  },
+  {
+    "id": 7,
+    "titulo": "O Senhor dos Anéis: A Sociedade do Anel",
+    "autor": "J. R. R. Tolkien",
+    "genero": "Fantasia",
+    "descricao": "Frodo parte em uma jornada para destruir um poderoso anel e impedir o retorno das forças do mal.",
+    "avaliacao": 4.9,
+    "capa": "https://m.media-amazon.com/images/I/91dSMhdIzTL.jpg"
+  },
+  {
+    "id": 8,
+    "titulo": "Orgulho e Preconceito",
+    "autor": "Jane Austen",
+    "genero": "Romance",
+    "descricao": "Elizabeth Bennet enfrenta preconceitos e descobre o verdadeiro significado do amor e do respeito.",
+    "avaliacao": 4.8,
+    "capa": "https://m.media-amazon.com/images/I/71Q1Iu4suSL.jpg"
+  },
+  {
+    "id": 9,
+    "titulo": "Sherlock Holmes: Um Estudo em Vermelho",
+    "autor": "Arthur Conan Doyle",
+    "genero": "Mistério",
+    "descricao": "A primeira investigação de Sherlock Holmes apresenta o brilhante detetive ao lado de Watson.",
+    "avaliacao": 4.8,
+    "capa": "https://m.media-amazon.com/images/I/61GFsO7j0ZL._SY425_.jpg"
+  },
+  {
+    "id": 10,
+    "titulo": "Percy Jackson e o Ladrão de Raios",
+    "autor": "Rick Riordan",
+    "genero": "Fantasia",
+    "descricao": "Um adolescente descobre ser filho de um deus grego e precisa impedir uma guerra entre os deuses.",
+    "avaliacao": 4.8,
+    "capa": "https://m.media-amazon.com/images/I/A1UjcPz4gZL._SY466_.jpg"
+  },
+  {
+    "id": 11,
+    "titulo": "Duna",
+    "autor": "Frank Herbert",
+    "genero": "Ficção Científica",
+    "descricao": "Em um planeta desértico, disputas políticas e religiosas moldam o destino da humanidade em torno da especiaria mais valiosa do universo.",
+    "avaliacao": 4.9,
+    "capa": "https://m.media-amazon.com/images/I/81ym3QUd3KL.jpg"
+  },
+  {
+    "id": 12,
+    "titulo": "Neuromancer",
+    "autor": "William Gibson",
+    "genero": "Cyberpunk",
+    "descricao": "Um hacker decadente recebe uma última missão que o leva a enfrentar inteligências artificiais e grandes corporações.",
+    "avaliacao": 4.7,
+    "capa": "https://m.media-amazon.com/images/I/91Bx5ilP+EL._SY466_.jpg"
+  },
+  {
+    "id": 13,
+    "titulo": "O Nome do Vento",
+    "autor": "Patrick Rothfuss",
+    "genero": "Fantasia",
+    "descricao": "Kvothe narra sua própria história, desde a infância difícil até sua ascensão como um dos maiores arcanistas do mundo.",
+    "avaliacao": 4.9,
+    "capa": "https://m.media-amazon.com/images/I/91bYsX41DVL.jpg"
+  },
+  {
+    "id": 14,
+    "titulo": "Jogos Vorazes",
+    "autor": "Suzanne Collins",
+    "genero": "Distopia",
+    "descricao": "Katniss Everdeen luta pela sobrevivência em uma competição mortal organizada por um governo autoritário.",
+    "avaliacao": 4.8,
+    "capa": "https://m.media-amazon.com/images/I/91M9xPIf10L.jpg"
+  },
+  {
+    "id": 15,
+    "titulo": "O Código Da Vinci",
+    "autor": "Dan Brown",
+    "genero": "Suspense",
+    "descricao": "Um professor de simbologia desvenda uma conspiração envolvendo obras de arte, religião e sociedades secretas.",
+    "avaliacao": 4.6,
+    "capa": "https://m.media-amazon.com/images/I/41r5FM0oRdL._SX342_SY445_ML2_.jpg"
+  },
+  {
+    "id": 16,
+    "titulo": "A Garota no Trem",
+    "autor": "Paula Hawkins",
+    "genero": "Suspense Psicológico",
+    "descricao": "Uma mulher testemunha um acontecimento estranho durante sua rotina de trem e acaba envolvida em um desaparecimento.",
+    "avaliacao": 4.5,
+    "capa": "https://m.media-amazon.com/images/I/81q77Q39nEL.jpg"
+  },
+  {
+    "id": 17,
+    "titulo": "O Alquimista",
+    "autor": "Paulo Coelho",
+    "genero": "Ficção",
+    "descricao": "Um jovem pastor viaja em busca de um tesouro e aprende importantes lições sobre sonhos e propósito.",
+    "avaliacao": 4.7,
+    "capa": "https://m.media-amazon.com/images/I/71aFt4+OTOL.jpg"
+  },
+  {
+    "id": 18,
+    "titulo": "Misery",
+    "autor": "Stephen King",
+    "genero": "Terror",
+    "descricao": "Um escritor é mantido em cativeiro por uma fã obsessiva após sofrer um acidente.",
+    "avaliacao": 4.8,
+    "capa": "https://m.media-amazon.com/images/I/51U2I+1cVTL._SY445_SX342_ML2_.jpg"
+  },
+  {
+    "id": 19,
+    "titulo": "Drácula",
+    "autor": "Bram Stoker",
+    "genero": "Terror",
+    "descricao": "O clássico romance gótico acompanha a luta contra o lendário Conde Drácula.",
+    "avaliacao": 4.7,
+    "capa": "https://m.media-amazon.com/images/I/41UN7I4TiGL._SY445_SX342_ML2_.jpg"
+  },
+  {
+    "id": 20,
+    "titulo": "O Guia do Mochileiro das Galáxias",
+    "autor": "Douglas Adams",
+    "genero": "Ficção Científica",
+    "descricao": "Após a destruição da Terra, Arthur Dent embarca em uma jornada absurda e divertida pelo universo.",
+    "avaliacao": 4.8,
+    "capa": "https://m.media-amazon.com/images/I/51B7vacPfEL._SY445_SX342_ML2_.jpg"
   }
 ]

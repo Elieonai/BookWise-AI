@@ -30,8 +30,7 @@ const addReview = (reviewData) => {
         bookId: Number(reviewData.bookId),
         nome: reviewData.nome,
         comentario: reviewData.comentario || '',
-        nota: reviewData.nota,
-        foto: reviewData.foto
+        nota: reviewData.nota
     };
 
     reviews.push(newReview);

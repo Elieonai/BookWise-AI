@@ -1,6 +1,6 @@
 import BookCard from "./BookCard";
 
-function BookList({ books }) {
+export default function BookList({ books }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {(books ?? []).map((book) => (
@@ -10,4 +10,3 @@ function BookList({ books }) {
   );
 }
 
-export default BookList;

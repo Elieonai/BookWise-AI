@@ -28,6 +28,20 @@ function LivroDetalhe() {
                 const livroData = await getBookById(id);
                 setLivro(livroData);
 
+                const resumeRes = await fetch(`/api/ai/reviews-summary/${id}`);
+
+                if (resumeRes.ok) {
+                    const resumeData = await resumeRes.json();
+
+                    setResume(
+                        resumeData.summary ||
+                        resumeData.resumo ||
+                        resumeData.text ||
+                        resumeData.message ||
+                        ""
+                    );
+                }
+
                 const reviewsRes = await fetch(`/api/reviews/${id}`);
                 const reviewsData = await reviewsRes.json();
                 setReviews(reviewsData);
@@ -45,6 +59,24 @@ function LivroDetalhe() {
 
         loadData();
     }, [id]);
+
+    async function carregarRecomendacoes() {
+        try {
+            setLoadingRecomendacao(true)
+            const livroData = await getBookById(id);
+            setLivro(livroData);
+            const aiRes = await fetch(`/api/ai/recommendations/${encodeURIComponent(livroData.titulo)}`);
+            const aiData = await aiRes.json();
+            setRecomendacoes(aiData);
+            console.log(aiData);
+            setVerRecomendacoesIa(true);
+        } catch (error) {
+            console.log(error);
+
+        } finally {
+            setLoadingRecomendacao(false)
+        }
+    }
 
     async function postarAvaliacao(e) {
         e.preventDefault();
@@ -83,6 +115,7 @@ function LivroDetalhe() {
             alert("Erro ao postar avaliação!");
         }
     }
+
 
     if (loading) return <p className="text-center mt-10 text-gray-500">Carregando...</p>;
     if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
@@ -153,6 +186,9 @@ function LivroDetalhe() {
                 {/* Reviews */}
                 <section>
                     <h2 className="text-4xl">Resenhas da comunidade</h2>
+
+                    {/* RESUMO DE REVIEWS */}
+                    <ResumeCard livro={livro.titulo} resumo={resume} />
 
                     <button
                         type="button"

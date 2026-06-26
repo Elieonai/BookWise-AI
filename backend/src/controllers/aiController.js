@@ -11,6 +11,21 @@ const getRecommendations = async (req, res) => {
     }
 };
 
+const getReviewSummary = async (req, res) => {
+    try {
+        const { bookId } = req.params;
+
+        const summary = await aiService.generateReviewSummary(bookId);
+        res.status(200).json(summary);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            summary: "No momento não foi possível gerar um resumo das avaliações."
+        });
+    }
+};
+
 module.exports = {
-    getRecommendations
+    getRecommendations,
+    getReviewSummary
 };

@@ -209,6 +209,146 @@
       "nome": "Aline Carvalho",
       "comentario": "Uma ficção científica diferente de tudo que já li. Divertida, inteligente e cheia de situações absurdas.",
       "nota": 4.8
+    },
+    {
+      "id": 31,
+      "bookId": 3,
+      "nome": "Lucas Pereira",
+      "comentario": "Gostei bastante da forma como a crítica política é apresentada. A leitura é rápida e faz refletir sobre poder e corrupção.",
+      "nota": 4.8
+    },
+    {
+      "id": 32,
+      "bookId": 3,
+      "nome": "Marina Costa",
+      "comentario": "Uma obra inteligente e atual. Mesmo escrita há décadas, continua fazendo muito sentido nos dias de hoje.",
+      "nota": 4.9
+    },
+    {
+      "id": 33,
+      "bookId": 7,
+      "nome": "Carlos Eduardo",
+      "comentario": "O universo criado por Tolkien é incrível. A jornada é emocionante e os personagens são inesquecíveis.",
+      "nota": 5
+    },
+    {
+      "id": 34,
+      "bookId": 7,
+      "nome": "Fernanda Lima",
+      "comentario": "A leitura exige atenção por causa da riqueza de detalhes, mas recompensa o leitor a cada capítulo.",
+      "nota": 4.8
+    },
+    {
+      "id": 35,
+      "bookId": 8,
+      "nome": "Gabriela Rocha",
+      "comentario": "Os diálogos são excelentes e a protagonista é muito carismática. Um romance clássico que envelheceu muito bem.",
+      "nota": 4.9
+    },
+    {
+      "id": 36,
+      "bookId": 9,
+      "nome": "Thiago Almeida",
+      "comentario": "Sherlock Holmes impressiona pela capacidade de observação. O mistério prende do início ao fim.",
+      "nota": 5
+    },
+    {
+      "id": 37,
+      "bookId": 10,
+      "nome": "Amanda Silva",
+      "comentario": "A mistura entre mitologia e aventura torna a leitura muito divertida. Excelente para jovens leitores.",
+      "nota": 4.9
+    },
+    {
+      "id": 38,
+      "bookId": 10,
+      "nome": "Matheus Ribeiro",
+      "comentario": "Gostei muito do ritmo da história e do humor presente nos diálogos. Quero continuar a série.",
+      "nota": 4.7
+    },
+    {
+      "id": 39,
+      "bookId": 12,
+      "nome": "Renata Souza",
+      "comentario": "A ambientação futurista é fantástica. Exige concentração, mas recompensa quem gosta de ficção científica.",
+      "nota": 4.7
+    },
+    {
+      "id": 40,
+      "bookId": 14,
+      "nome": "Diego Martins",
+      "comentario": "Katniss é uma protagonista forte e determinada. A crítica ao entretenimento e ao poder é excelente.",
+      "nota": 4.9
+    },
+    {
+      "id": 41,
+      "bookId": 16,
+      "nome": "Juliana Santos",
+      "comentario": "A autora consegue criar suspense em praticamente todos os capítulos. O final me surpreendeu bastante.",
+      "nota": 4.7
+    },
+    {
+      "id": 42,
+      "bookId": 17,
+      "nome": "Rodrigo Carvalho",
+      "comentario": "Uma leitura leve, inspiradora e cheia de reflexões sobre sonhos e propósito de vida.",
+      "nota": 4.9
+    },
+    {
+      "id": 43,
+      "bookId": 18,
+      "nome": "Camila Ferreira",
+      "comentario": "Stephen King cria uma tensão psicológica absurda. Fiquei preso na história até a última página.",
+      "nota": 5
+    },
+    {
+      "id": 44,
+      "bookId": 19,
+      "nome": "Bruno Oliveira",
+      "comentario": "Mesmo sendo um clássico, consegue criar uma atmosfera sombria e envolvente durante toda a narrativa.",
+      "nota": 4.8
+    },
+    {
+      "id": 45,
+      "bookId": 5,
+      "nome": "Natália Gomes",
+      "comentario": "Bilbo cresce muito durante a aventura. O livro consegue equilibrar humor, ação e fantasia de forma excelente.",
+      "nota": 5
+    },
+    {
+      "id": 46,
+      "bookId": 6,
+      "nome": "Felipe Mendes",
+      "comentario": "Uma leitura extremamente divertida. Hogwarts é um universo que desperta a imaginação de qualquer leitor.",
+      "nota": 5
+    },
+    {
+      "id": 47,
+      "bookId": 11,
+      "nome": "Aline Ribeiro",
+      "comentario": "No começo achei a leitura difícil, mas depois fiquei completamente envolvida pela história e pelos conflitos políticos.",
+      "nota": 4.8
+    },
+    {
+      "id": 48,
+      "bookId": 13,
+      "nome": "Vinícius Lopes",
+      "comentario": "A escrita é belíssima e a construção do protagonista é uma das melhores que já encontrei em fantasia.",
+      "nota": 5
+    },
+    {
+      "id": 49,
+      "bookId": 20,
+      "nome": "Luiza Martins",
+      "comentario": "Um humor completamente diferente do comum. Dei várias risadas durante a leitura e adorei as referências.",
+      "nota": 5
+    },
+    {
+      "id": 50,
+      "bookId": 1,
+      "nome": "Roberto Dias",
+      "comentario": "A ambiguidade da narrativa é o ponto alto da obra. Cada leitor pode interpretar os acontecimentos de uma maneira diferente.",
+      "nota": 4.9
     }
   ]
 }

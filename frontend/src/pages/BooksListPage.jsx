@@ -1,32 +1,63 @@
 import { useBooks } from "../hooks/useBooks";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import BookList from "../components/BookList";
 import SearchBar from "../components/SearchBar";
 import Footer from "../components/Footer";
 
 export default function BooksListPage() {
-    // 1. Pegamos apenas os dados puros do Hook
     const { books, loading, error } = useBooks();
 
-    // 2. Trazemos o estado de busca para a página
     const [search, setSearch] = useState("");
-    
+    const [searchResults, setSearchResults] = useState(null); // null = sem busca ativa
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [searchType, setSearchType] = useState(null);
+
     const [page, setPage] = useState(1);
     const perPage = 6;
 
-    const filteredBooks = books.filter(book =>
-        book.titulo?.toLowerCase().includes(search.toLowerCase())
-    );
+    // Debounce — só chama a API 600ms depois que o usuário parar de digitar
+    useEffect(() => {
+        if (search.trim().length < 2) {
+            setSearchResults(null);
+            setSearchType(null);
+            return;
+        }
 
-    const maxPage = Math.max(1, Math.ceil(filteredBooks.length / perPage));
-    const startIndex = (page - 1) * perPage;
-    const endIndex = startIndex + perPage;
-    const booksToShow = filteredBooks.slice(startIndex, endIndex);
+        const timer = setTimeout(async () => {
+            try {
+                setSearchLoading(true);
+
+                const res = await fetch('/api/ai/semantic-search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: search })
+                });
+
+                const data = await res.json();
+                setSearchResults(data.results);
+                setSearchType(data.type);
+
+            } catch (err) {
+                console.error('Erro na busca semântica:', err);
+                setSearchResults([]);
+            } finally {
+                setSearchLoading(false);
+            }
+        }, 600);
+
+        return () => clearTimeout(timer);
+    }, [search]);
 
     useEffect(() => {
         setPage(1);
     }, [search]);
+
+    const activeBooks = searchResults !== null ? searchResults : books;
+
+    const maxPage = Math.max(1, Math.ceil(activeBooks.length / perPage));
+    const startIndex = (page - 1) * perPage;
+    const booksToShow = activeBooks.slice(startIndex, startIndex + perPage);
 
     if (loading) {
         return (
@@ -59,46 +90,60 @@ export default function BooksListPage() {
                 </section>
 
                 <section className="mb-10">
-                    <SearchBar 
-                        value={search}
-                        onChange={setSearch} 
-                    />
+                    <SearchBar value={search} onChange={setSearch} />
+
+                    {/* Indicador do tipo de busca */}
+                    {searchType === "semantic" && (
+                        <p className="text-center text-sm text-lime-700 mt-2">
+                            ✨ Resultados por busca inteligente
+                        </p>
+                    )}
+                    {searchType === "fallback" && (
+                        <p className="text-center text-sm text-yellow-600 mt-2">
+                            ⚠️ Busca inteligente indisponível. Exibindo resultados aproximados.
+                        </p>
+                    )}
+                    {searchType === "direct" && (
+                        <p className="text-center text-sm text-gray-500 mt-2">
+                            📚 Resultado direto do catálogo
+                        </p>
+                    )}
+                    {searchLoading && (
+                        <p className="text-center text-sm text-lime-600 mt-2">
+                            🔍 Buscando...
+                        </p>
+                    )}
                 </section>
 
                 <section>
-                    {filteredBooks.length === 0 ? (
+                    {activeBooks.length === 0 ? (
                         <p className="text-lime-800">Nenhum livro encontrado.</p>
                     ) : (
-                        <BookList books={booksToShow} />   
-                    )}            
+                        <BookList books={booksToShow} />
+                    )}
                 </section>
 
-                {/* PAGINAÇÃO */}
-                {filteredBooks.length > 0 && (
+                {activeBooks.length > 0 && (
                     <div className="flex justify-center items-center gap-6 mt-8">
                         <button
                             onClick={() => setPage(prev => Math.max(prev - 1, 1))}
                             disabled={page === 1}
-                            // Corrigido: Removido o text-lime-700 conflituoso
                             className="bg-lime-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-lime-800 disabled:opacity-50 disabled:cursor-not-allowed">
                             Anterior
                         </button>
-                        
-                        <span className="text-lime-900">
-                            Página {page}
-                        </span>
+
+                        <span className="text-lime-900">Página {page}</span>
 
                         <button
-                            onClick={() => setPage(prev => Math.min(prev + 1, maxPage))}                
+                            onClick={() => setPage(prev => Math.min(prev + 1, maxPage))}
                             disabled={page >= maxPage}
-                            // Corrigido: Removido o text-lime-700 conflituoso
                             className="bg-lime-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-lime-800 disabled:opacity-50 disabled:cursor-not-allowed">
                             Próximo
                         </button>
                     </div>
-                )}          
+                )}
             </main>
-            
+
             <Footer />
         </div>
     );

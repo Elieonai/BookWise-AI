@@ -1,16 +1,26 @@
 const reviewsService = require('../services/reviewService');
+const { parsePositiveInt } = require('../utils/validation');
 
+const sendError = (res, status, message) => res.status(status).json({
+    success: false,
+    error: { message }
+});
+
+/* Lista reviews gerais ou filtradas por bookId. */
 const getAllReviews = async (req, res) => {
     const { bookId } = req.params;
 
     try {
-        const reviews = await reviewsService.getAllReviews(bookId);
-        res.json(reviews);
+        const parsedBookId = bookId ? parsePositiveInt(bookId, 'bookId') : undefined;
+        const reviews = await reviewsService.getAllReviews(parsedBookId);
+        res.status(200).json(reviews);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Erro ao listar resenhas:', error);
+        sendError(res, 400, 'Não foi possível listar as resenhas.');
     }
 };
 
+/* Cria uma review usando validacao do service. */
 const addReview = async (req, res) => {
     const reviewData = req.body;
 
@@ -18,11 +28,12 @@ const addReview = async (req, res) => {
         const newReview = await reviewsService.addReview(reviewData);
         res.status(201).json(newReview);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error('Erro ao criar resenha:', error);
+        sendError(res, 400, error.message);
     }
 };
 
 module.exports = {
     getAllReviews,
     addReview
-};      
+};

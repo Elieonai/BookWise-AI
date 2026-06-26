@@ -1,54 +1,58 @@
 const aiService = require('../services/aiService');
+const { clampText, parsePositiveInt } = require('../utils/validation');
 
+const sendError = (res, status, message) => res.status(status).json({
+    success: false,
+    error: { message }
+});
+
+/* Retorna recomendacoes de livros similares. */
 const getRecommendations = async (req, res) => {
     try {
-        const { bookTitle } = req.params;
+        const bookTitle = clampText(req.params.bookTitle, 120);
+
+        if (bookTitle.length < 2) {
+            return sendError(res, 400, 'Informe um título com pelo menos 2 caracteres.');
+        }
 
         const recommendations = await aiService.getRecommendations(bookTitle);
         res.status(200).json(recommendations);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Erro ao gerar recomendações:', error);
+        sendError(res, 500, 'Não foi possível gerar recomendações.');
     }
 };
 
+/* Retorna resumo gerado a partir das reviews do livro. */
 const getReviewSummary = async (req, res) => {
     try {
-        const { bookId } = req.params;
+        const bookId = parsePositiveInt(req.params.bookId, 'bookId');
 
         const summary = await aiService.generateReviewSummary(bookId);
         res.status(200).json(summary);
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            summary: "No momento não foi possível gerar um resumo das avaliações."
-        });
+        sendError(res, 500, 'No momento não foi possível gerar um resumo das avaliações.');
     }
 };
 
+/* Executa busca textual ou semantica no catalogo. */
 const semanticSearchBooks = async (req, res) => {
     try {
-        const { query } = req.body;
+        const searchQuery = clampText(req.body.query, 160);
 
-        if (!query || query.trim().length < 2) {
-            return res.status(400).json({
-                type: "empty",
-                results: [],
-                message: "O campo query é obrigatório."
-            });
+        if (searchQuery.length < 2) {
+            return sendError(res, 400, 'O campo query é obrigatório.');
         }
 
-        const response = await aiService.semanticSearchBooks(query);
+        const response = await aiService.semanticSearchBooks(searchQuery);
 
         return res.status(200).json(response);
 
     } catch (error) {
-        console.error("Erro na busca semântica:", error);
+        console.error('Erro na busca semântica:', error);
 
-        return res.status(500).json({
-            type: "error",
-            results: [],
-            message: "Não foi possível realizar a busca."
-        });
+        return sendError(res, 500, 'Não foi possível realizar a busca.');
     }
 };
 

@@ -7,46 +7,54 @@ const {
     serverTimestamp,
     where
 } = require('firebase/firestore');
+const { clampText, parsePositiveInt, parseRating } = require('../utils/validation');
 
 const reviewsCollection = collection(db, 'reviews');
 
+/* Converte documento do Firestore para resposta da API. */
 const mapReviewDocument = (doc) => ({
     id: doc.id,
     ...doc.data()
 });
 
+/* Lista reviews do Firestore, com filtro opcional por livro. */
 const getAllReviews = async (bookId) => {
-    const snapshot = await getDocs(query(
-        reviewsCollection,
-        where('bookId', '==', Number(bookId))
-    ));
+    const parsedBookId = bookId ? parsePositiveInt(bookId, 'bookId') : undefined;
+    const reviewsQuery = bookId
+        ? query(reviewsCollection, where('bookId', '==', parsedBookId))
+        : reviewsCollection;
+
+    const snapshot = await getDocs(reviewsQuery);
 
     return snapshot.docs.map(mapReviewDocument);
 };
 
+/* Valida e cria uma review no Firestore. */
 const addReview = async (reviewData) => {
     if (!reviewData.bookId) {
-        throw new Error('bookId is required');
+        throw new Error('O campo bookId é obrigatório.');
     }
 
-    if (!reviewData.nome) {
-        throw new Error('nome is required');
+    if (reviewData.nota === undefined || reviewData.nota === null || reviewData.nota === '') {
+        throw new Error('O campo nota é obrigatório.');
     }
 
-    if (!reviewData.nota) {
-        throw new Error('nota is required');
-    }
+    const bookId = parsePositiveInt(reviewData.bookId, 'bookId');
+    const nome = clampText(reviewData.nome, 80);
+    const comentario = clampText(reviewData.comentario || '', 1000);
+    const nota = parseRating(reviewData.nota);
+    const foto = clampText(reviewData.foto || '', 500) || null;
 
-    if (reviewData.nota < 1 || reviewData.nota > 5) {
-        throw new Error('nota must be between 1 and 5');
+    if (!nome) {
+        throw new Error('O campo nome é obrigatório.');
     }
 
     const newReview = {
-        bookId: Number(reviewData.bookId),
-        nome: reviewData.nome,
-        comentario: reviewData.comentario || '',
-        nota: Number(reviewData.nota),
-        foto: reviewData.foto || null,
+        bookId,
+        nome,
+        comentario,
+        nota,
+        foto,
         createdAt: serverTimestamp()
     };
 

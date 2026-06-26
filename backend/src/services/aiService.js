@@ -1,13 +1,13 @@
 require('dotenv').config();
-const { readReviews } = require("./fileService");
-const { readBooks } = require("./bookFileService");
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { db } = require('../config/firebase');
 const { collection, getDocs } = require('firebase/firestore');
 const bookService = require('./bookService');
+const reviewService = require('./reviewService');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+/* Gera recomendacoes com Gemini e usa fallback se a IA falhar. */
 const getRecommendations = async (bookTitle) => {
     try {
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
@@ -26,15 +26,15 @@ const getRecommendations = async (bookTitle) => {
             Recomende 3 livros similares a: "${bookTitle}"
         `;
 
-        const respostaBruta = await model.generateContent(prompt);
-        const textoDaResposta = respostaBruta.response.text();
+        const rawResponse = await model.generateContent(prompt);
+        const responseText = rawResponse.response.text();
 
-        const stringJsonLimpa = textoDaResposta
+        const cleanJsonString = responseText
             .replace(/```json/g, '')
             .replace(/```/g, '')
             .trim();
 
-        return JSON.parse(stringJsonLimpa);
+        return JSON.parse(cleanJsonString);
 
     } catch (error) {
         console.error('Erro Gemini:', error);
@@ -42,12 +42,14 @@ const getRecommendations = async (bookTitle) => {
     }
 };
 
+/* Busca todas as reviews para calculos de fallback. */
 const getAllReviews = async () => {
     const snapshot = await getDocs(collection(db, 'reviews'));
 
     return snapshot.docs.map(doc => doc.data());
 };
 
+/* Calcula ranking de livros por media de reviews. */
 const getTopRatedBooks = async () => {
     const reviews = await getAllReviews();
     const grouped = {};
@@ -68,6 +70,7 @@ const getTopRatedBooks = async () => {
         .sort((a, b) => b.avg - a.avg);
 };
 
+/* Retorna recomendacoes baseadas nas reviews ou no catalogo. */
 const getFallbackRecommendations = async () => {
     const ranked = await getTopRatedBooks();
     const books = await bookService.getAllBooks();
@@ -85,21 +88,19 @@ const getFallbackRecommendations = async () => {
         .map(book => ({ livro: book.titulo, autor: book.autor, sinopse: book.descricao }));
 };
 
+/* Resume a opiniao da comunidade sobre um livro. */
 const generateReviewSummary = async (bookId) => {
-    const books = readBooks();
-    const reviews = readReviews();
+    let book;
 
-    const book = books.find(book => book.id === Number(bookId));
-
-    if (!book) {
+    try {
+        book = await bookService.getBookById(bookId);
+    } catch {
         return {
             summary: "Livro não encontrado."
         };
     }
 
-    const bookReviews = reviews.filter(
-        review => review.bookId === Number(bookId)
-    );
+    const bookReviews = await reviewService.getAllReviews(bookId);
 
     if (bookReviews.length < 2) {
         return {
@@ -109,90 +110,93 @@ const generateReviewSummary = async (bookId) => {
 
     const reviewsText = bookReviews
         .map((review, index) => `
-Avaliação ${index + 1}
-Nota: ${review.nota}
-Comentário: ${review.comentario}
+            Avaliação ${index + 1}
+            Nota: ${review.nota}
+            Comentário: ${review.comentario}
         `)
-        .join("\n----------------------\n");
+        .join('\n----------------------\n');
 
     const prompt = `
-Você é um assistente especializado em literatura.
+            Você é um assistente especializado em literatura.
 
-Livro:
-Título: ${book.titulo}
-Autor: ${book.autor}
-Gênero: ${book.genero}
-Descrição: ${book.descricao}
+            Livro:
+            Título: ${book.titulo}
+            Autor: ${book.autor}
+            Gênero: ${book.genero}
+            Descrição: ${book.descricao}
 
-Com base APENAS nas avaliações abaixo, gere um resumo da opinião da comunidade.
+            Com base APENAS nas avaliações abaixo, gere um resumo da opinião da comunidade.
 
-Regras:
-- Escreva entre 50 e 90 palavras.
-- Destaque principais elogios.
-- Destaque eventuais críticas.
-- Informe o sentimento geral dos leitores.
-- Não cite nomes de usuários.
-- Não invente informações.
-- Não use listas.
-- Retorne SOMENTE JSON.
+            Regras:
+            - Escreva entre 50 e 90 palavras.
+            - Destaque principais elogios.
+            - Destaque eventuais críticas.
+            - Informe o sentimento geral dos leitores.
+            - Não cite nomes de usuários.
+            - Não invente informações.
+            - Não use listas.
+            - Retorne SOMENTE JSON.
 
-Formato:
-{
-  "summary": "..."
-}
+            Formato:
+            {
+            "summary": "..."
+            }
 
-Avaliações:
-${reviewsText}
-`;
+            Avaliações:
+            ${reviewsText}
+        `;
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-        const respostaBruta = await model.generateContent(prompt);
-        const textoDaResposta = respostaBruta.response.text();
+        const rawResponse = await model.generateContent(prompt);
+        const responseText = rawResponse.response.text();
 
-        const stringJsonLimpa = textoDaResposta
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
+        const cleanJsonString = responseText
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
             .trim();
 
-        return JSON.parse(stringJsonLimpa);
+        return JSON.parse(cleanJsonString);
 
     } catch (error) {
-        console.error("Erro Gemini ao resumir reviews:", error);
+        console.error('Erro Gemini ao resumir reviews:', error);
 
         return {
-            summary: "No momento não foi possível gerar um resumo automático das avaliações."
+            summary: 'No momento não foi possível gerar um resumo automático das avaliações.'
         };
     }
 };
 
+/* Normaliza texto para comparacoes sem acentos e caixa. */
 const normalizeText = (text) => {
     return text
         .toString()
         .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
 };
 
+/* Faz busca textual direta no catalogo carregado. */
 const directSearchBooks = (query, books) => {
     const normalizedQuery = normalizeText(query);
 
     return books.filter(book => {
-        const titulo = normalizeText(book.titulo);
-        const autor = normalizeText(book.autor);
-        const genero = normalizeText(book.genero);
-        const descricao = normalizeText(book.descricao);
+        const titleText = normalizeText(book.titulo);
+        const authorText = normalizeText(book.autor);
+        const genreText = normalizeText(book.genero);
+        const descriptionText = normalizeText(book.descricao);
 
         return (
-            titulo.includes(normalizedQuery) ||
-            autor.includes(normalizedQuery) ||
-            genero.includes(normalizedQuery) ||
-            descricao.includes(normalizedQuery)
+            titleText.includes(normalizedQuery) ||
+            authorText.includes(normalizedQuery) ||
+            genreText.includes(normalizedQuery) ||
+            descriptionText.includes(normalizedQuery)
         );
     });
 };
 
+/* Faz ranking local quando a busca semantica com IA falha. */
 const fallbackSemanticSearch = (query, books) => {
     const normalizedQuery = normalizeText(query);
 
@@ -220,18 +224,19 @@ const fallbackSemanticSearch = (query, books) => {
 
     return rankedBooks.slice(0, 5).map(item => ({
         ...item.book,
-        motivo: "Este livro possui características próximas ao que foi buscado."
+        motivo: 'Este livro possui características próximas ao que foi buscado.'
     }));
 };
 
+/* Busca livros por texto direto, IA ou fallback local. */
 const semanticSearchBooks = async (query) => {
-    const books = readBooks();
+    const books = await bookService.getAllBooks();
 
     if (!query || query.trim().length < 2) {
         return {
-            type: "empty",
+            type: 'empty',
             results: [],
-            message: "Digite pelo menos 2 caracteres para buscar."
+            message: 'Digite pelo menos 2 caracteres para buscar.'
         };
     }
 
@@ -239,66 +244,66 @@ const semanticSearchBooks = async (query) => {
 
     if (directResults.length > 0) {
         return {
-            type: "direct",
+            type: 'direct',
             results: directResults.map(book => ({
                 ...book,
-                motivo: "Encontrado diretamente no catálogo."
+                motivo: 'Encontrado diretamente no catálogo.'
             }))
         };
     }
 
     const catalogText = books
         .map(book => `
-ID: ${book.id}
-Título: ${book.titulo}
-Autor: ${book.autor}
-Gênero: ${book.genero}
-Descrição: ${book.descricao}
-Avaliação: ${book.avaliacao}
-`)
-        .join("\n----------------------\n");
+            ID: ${book.id}
+            Título: ${book.titulo}
+            Autor: ${book.autor}
+            Gênero: ${book.genero}
+            Descrição: ${book.descricao}
+            Avaliação: ${book.avaliacao}
+        `)
+        .join('\n----------------------\n');
 
     const prompt = `
-Você é um assistente especializado em recomendação de livros.
+        Você é um assistente especializado em recomendação de livros.
 
-O usuário fez a seguinte busca:
-"${query}"
+        O usuário fez a seguinte busca:
+        "${query}"
 
-Sua tarefa é recomendar até 5 livros do catálogo abaixo que mais combinam semanticamente com o pedido.
+        Sua tarefa é recomendar até 5 livros do catálogo abaixo que mais combinam semanticamente com o pedido.
 
-REGRAS:
-- Escolha APENAS livros existentes no catálogo.
-- Não invente livros.
-- Não altere os IDs.
-- Retorne no máximo 5 livros.
-- Se nenhum livro combinar, retorne array vazio.
-- O motivo deve explicar de forma curta por que o livro combina com a busca.
-- Retorne SOMENTE JSON, sem markdown e sem texto adicional.
+        REGRAS:
+        - Escolha APENAS livros existentes no catálogo.
+        - Não invente livros.
+        - Não altere os IDs.
+        - Retorne no máximo 5 livros.
+        - Se nenhum livro combinar, retorne array vazio.
+        - O motivo deve explicar de forma curta por que o livro combina com a busca.
+        - Retorne SOMENTE JSON, sem markdown e sem texto adicional.
 
-Formato obrigatório:
-[
-  {
-    "id": 1,
-    "motivo": "..."
-  }
-]
+        Formato obrigatório:
+        [
+            {
+                "id": 1,
+                "motivo": "..."
+            }
+        ]
 
-Catálogo:
-${catalogText}
-`;
+        Catálogo:
+        ${catalogText}
+    `;
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-        const respostaBruta = await model.generateContent(prompt);
-        const textoDaResposta = respostaBruta.response.text();
+        const rawResponse = await model.generateContent(prompt);
+        const responseText = rawResponse.response.text();
 
-        const stringJsonLimpa = textoDaResposta
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
+        const cleanJsonString = responseText
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
             .trim();
 
-        const aiResults = JSON.parse(stringJsonLimpa);
+        const aiResults = JSON.parse(cleanJsonString);
 
         const results = aiResults
             .map(result => {
@@ -308,25 +313,25 @@ ${catalogText}
 
                 return {
                     ...book,
-                    motivo: result.motivo || "Este livro combina com a busca realizada."
+                    motivo: result.motivo || 'Este livro combina com a busca realizada.'
                 };
             })
             .filter(Boolean);
 
         return {
-            type: "semantic",
+            type: 'semantic',
             results
         };
 
     } catch (error) {
-        console.error("Erro Gemini na busca semântica:", error);
+        console.error('Erro Gemini na busca semântica:', error);
 
         const fallbackResults = fallbackSemanticSearch(query, books);
 
         return {
-            type: "fallback",
+            type: 'fallback',
             results: fallbackResults,
-            message: "A busca inteligente está temporariamente indisponível. Exibindo resultados aproximados."
+            message: 'A busca inteligente está temporariamente indisponível. Exibindo resultados aproximados.'
         };
     }
 };

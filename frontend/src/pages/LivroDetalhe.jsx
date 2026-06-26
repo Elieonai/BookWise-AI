@@ -1,21 +1,16 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import ReviewCard from "../components/reviewCard";
 import Footer from "../components/Footer";
 import { getBookById } from "../services/booksService";
-import ResumeCard from "../components/ResumeCard";
 
 function LivroDetalhe() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [modalAberto, setModalAberto] = useState(false);
 
-    const [verRecomendacoesIa, setVerRecomendacoesIa] = useState(false);
-    const [loadingRecomendacao, setLoadingRecomendacao] = useState(null)
-
     const [livro, setLivro] = useState(null);
-    const [resume, setResume] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [recomendacoes, setRecomendacoes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -50,6 +45,10 @@ function LivroDetalhe() {
                 const reviewsRes = await fetch(`/api/reviews/${id}`);
                 const reviewsData = await reviewsRes.json();
                 setReviews(reviewsData);
+
+                const aiRes = await fetch(`/api/ai/recommendations/${encodeURIComponent(livroData.titulo)}`);
+                const aiData = await aiRes.json();
+                setRecomendacoes(aiData);
 
             } catch (err) {
                 setError(err.message);
@@ -122,7 +121,6 @@ function LivroDetalhe() {
     if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
     if (!livro) return <p className="text-center mt-10 text-gray-500">Livro não encontrado.</p>;
 
-
     return (
         <>
             <header>
@@ -169,33 +167,21 @@ function LivroDetalhe() {
                 </section>
 
                 {/* Recomendações da IA */}
-                <h2 className="text-2xl font-bold mb-4">✨ Você vai adorar isto! Aqui está sua recomendação personalizada</h2>
+                {recomendacoes.length > 0 && (
+                    <section className="mb-10">
+                        <h2 className="text-2xl font-bold mb-4">✨ Gostou deste? A IA recomenda...</h2>
 
-                <button className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-4 px-10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 mb-5" onClick={carregarRecomendacoes}>
-                    Quero ver
-                </button>
-
-                {
-                    loadingRecomendacao && <p>Carregando ...</p>
-                }
-
-                {
-                    verRecomendacoesIa && recomendacoes.length > 0 && (
-                        <section className="mb-8">
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {recomendacoes.map((rec, index) => (
-                                    <div key={index} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                                        <p className="font-bold text-sm">{rec.livro}</p>
-                                        <p className="text-xs text-gray-500 mt-1">{rec.autor}</p>
-                                        <p className="text-xs text-gray-700 mt-2">{rec.sinopse}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )
-                }
-
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {recomendacoes.map((rec, index) => (
+                                <div key={index} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                    <p className="font-bold text-sm">{rec.livro}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{rec.autor}</p>
+                                    <p className="text-xs text-gray-700 mt-2">{rec.sinopse}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Reviews */}
                 <section>

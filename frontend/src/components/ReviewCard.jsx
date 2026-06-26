@@ -2,7 +2,7 @@ function ReviewCard({ review }) {
   return (
     <div className="flex gap-3 p-4 bg-white rounded-xl border border-gray-100 mt-5">
 
-      {/* <div className="size-10 rounded-full bg-red-400 shrink-0" /> */}
+      <div className="size-10 rounded-full bg-red-400 shrink-0" />
 
       <div className="flex flex-col gap-1">
         <p className="font-semibold text-sm text-gray-900">

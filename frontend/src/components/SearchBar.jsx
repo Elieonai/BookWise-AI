@@ -11,9 +11,9 @@ export default function SearchBar({ value, onChange}) {
               placeholder="Pesquise seu livro aqui"
               className="flex-1 outline-none text-sm bg-transparent" />
 
-                <button className="cursor-pointer m1-2 text-lime-700 hover:text-lime-900">
+              <span>
                   🔍
-                </button>
+              </span>
           </div>
         </div>
 

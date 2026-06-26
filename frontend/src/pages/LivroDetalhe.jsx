@@ -170,7 +170,7 @@ function LivroDetalhe() {
 
                 {
                     verRecomendacoesIa && recomendacoes.length > 0 && (
-                        <section className="mb-10">
+                        <section className="mb-8">
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {recomendacoes.map((rec, index) => (
@@ -191,7 +191,7 @@ function LivroDetalhe() {
                     <h2 className="text-4xl">Resenhas da comunidade</h2>
 
                     {/* RESUMO DE REVIEWS */}
-                    {/* <ResumeCard livro={livro.titulo} resumo={resume}/> */}
+                    <ResumeCard livro={livro.titulo} resumo={resume}/>
 
                     <button
                         type="button"

@@ -5,7 +5,7 @@ export default function Navbar() {
     <header className="bg-lime-800/75 text-white shadow">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">
-          BookWise AI
+          Capiventure AI
         </h1>
 
         <nav>
@@ -16,10 +16,6 @@ export default function Navbar() {
 
             <li>
               <Link to="/books" className="hover:text-lime-900">Livros</Link>
-            </li>
-
-            <li>
-              <Link to="/reviews" className="hover:text-lime-900">Resenhas</Link>
             </li>
           </ul>
         </nav>

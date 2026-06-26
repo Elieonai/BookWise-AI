@@ -33,8 +33,19 @@ function LivroDetalhe() {
                 const livroData = await getBookById(id);
                 setLivro(livroData);
 
-                // const resumeData = await fetch(`api/ai/reviews-summary/${id}`)
-                // setResume(resumeData);
+                const resumeRes = await fetch(`/api/ai/reviews-summary/${id}`);
+
+                if (resumeRes.ok) {
+                    const resumeData = await resumeRes.json();
+
+                    setResume(
+                        resumeData.summary ||
+                        resumeData.resumo ||
+                        resumeData.text ||
+                        resumeData.message ||
+                        ""
+                    );
+                }
 
                 const reviewsRes = await fetch(`/api/reviews/${id}`);
                 const reviewsData = await reviewsRes.json();
@@ -62,7 +73,7 @@ function LivroDetalhe() {
             setVerRecomendacoesIa(true);
         } catch (error) {
             console.log(error);
-            
+
         } finally {
             setLoadingRecomendacao(false)
         }
@@ -106,7 +117,7 @@ function LivroDetalhe() {
         }
     }
 
-    
+
     if (loading) return <p className="text-center mt-10 text-gray-500">Carregando...</p>;
     if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
     if (!livro) return <p className="text-center mt-10 text-gray-500">Livro não encontrado.</p>;
@@ -191,7 +202,7 @@ function LivroDetalhe() {
                     <h2 className="text-4xl">Resenhas da comunidade</h2>
 
                     {/* RESUMO DE REVIEWS */}
-                    <ResumeCard livro={livro.titulo} resumo={resume}/>
+                    <ResumeCard livro={livro.titulo} resumo={resume} />
 
                     <button
                         type="button"

@@ -206,7 +206,7 @@ function LivroDetalhe() {
                     <button
                         type="button"
                         onClick={() => setModalAberto(true)}
-                        className="bg-blue-600 hover:bg-blue-800 text-white text-sm px-5 py-2 rounded-lg transition-colors duration-150 cursor-pointer font-bold mt-5"
+                        className="bg-green-600 hover:bg-green-700 text-white text-sm px-5 py-2 rounded-lg transition-colors duration-150 cursor-pointer font-bold mt-5"
                     >
                         Avaliar livro
                     </button>

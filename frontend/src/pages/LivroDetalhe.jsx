@@ -1,18 +1,19 @@
 import { useState, useEffect, use } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import ReviewCard from "../components/reviewCard";
+import ReviewCard from "../components/ReviewCard";
 import Footer from "../components/Footer";
 import { getBookById } from "../services/booksService";
+import { getRecommendations } from "../services/recommendationsService";
+import { addReview, getReviews } from "../services/reviewsService";
 import ResumeCard from "../components/ResumeCard";
 
 function LivroDetalhe() {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [modalAberto, setModalAberto] = useState(false);
 
     const [verRecomendacoesIa, setVerRecomendacoesIa] = useState(false);
-    const [loadingRecomendacao, setLoadingRecomendacao] = useState(null)
+    const [loadingRecomendacao, setLoadingRecomendacao] = useState(false);
 
     const [livro, setLivro] = useState(null);
     const [resume, setResume] = useState(null);
@@ -33,24 +34,15 @@ function LivroDetalhe() {
                 const livroData = await getBookById(id);
                 setLivro(livroData);
 
-                const resumeRes = await fetch(`/api/ai/reviews-summary/${id}`);
-
-                if (resumeRes.ok) {
-                    const resumeData = await resumeRes.json();
-
-                    setResume(
-                        resumeData.summary ||
-                        resumeData.resumo ||
-                        resumeData.text ||
-                        resumeData.message ||
-                        ""
-                    );
-                }
-
-                const reviewsRes = await fetch(`/api/reviews/${id}`);
-                const reviewsData = await reviewsRes.json();
+                const reviewsData = await getReviews(id);
                 setReviews(reviewsData);
 
+                try {
+                    const aiData = await getRecommendations(livroData.titulo);
+                    setRecomendacoes(aiData);
+                } catch {
+                    setRecomendacoes([]);
+                }
 
             } catch (err) {
                 setError(err.message);
@@ -64,19 +56,17 @@ function LivroDetalhe() {
 
     async function carregarRecomendacoes() {
         try {
-            setLoadingRecomendacao(true)
+            setLoadingRecomendacao(true);
             const livroData = await getBookById(id);
             setLivro(livroData);
-            const aiRes = await fetch(`/api/ai/recommendations/${encodeURIComponent(livroData.titulo)}`);
-            const aiData = await aiRes.json();
+            const aiData = await getRecommendations(livroData.titulo);
             setRecomendacoes(aiData);
-            console.log(aiData);
             setVerRecomendacoesIa(true);
         } catch (error) {
-            console.log(error);
-
+            console.error(error);
+            setRecomendacoes([]);
         } finally {
-            setLoadingRecomendacao(false)
+            setLoadingRecomendacao(false);
         }
     }
 
@@ -88,24 +78,18 @@ function LivroDetalhe() {
             return;
         }
 
-        if (Number(nota) < 0 || Number(nota) > 5) {
-            alert("A nota precisa ser entre 0 e 5!");
+        if (Number(nota) < 1 || Number(nota) > 5) {
+            alert("A nota precisa ser entre 1 e 5!");
             return;
         }
 
         try {
-            const response = await fetch('/api/reviews', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bookId: Number(id),
-                    nome,
-                    comentario,
-                    nota: Number(nota)
-                })
+            const novaReview = await addReview({
+                bookId: Number(id),
+                nome,
+                comentario,
+                nota: Number(nota)
             });
-
-            const novaReview = await response.json();
             setReviews(prev => [...prev, novaReview]);
 
             setNome("");
@@ -113,7 +97,7 @@ function LivroDetalhe() {
             setNota("");
             setModalAberto(false);
 
-        } catch (err) {
+        } catch {
             alert("Erro ao postar avaliação!");
         }
     }
@@ -196,6 +180,7 @@ function LivroDetalhe() {
                     )
                 }
 
+
                 {/* Reviews */}
                 <section>
                     <h2 className="text-4xl">Resenhas da comunidade</h2>
@@ -225,21 +210,28 @@ function LivroDetalhe() {
                 {/* Modal */}
                 {modalAberto && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-xl shadow-xl w-100 relative">
+                        <div
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="review-modal-title"
+                            className="bg-white p-6 rounded-xl shadow-xl w-100 relative"
+                        >
                             <button
                                 type="button"
                                 onClick={() => setModalAberto(false)}
+                                aria-label="Fechar modal de avaliação"
                                 className="absolute top-3 right-3 text-gray-500 hover:text-black text-xl"
                             >
                                 ×
                             </button>
 
-                            <h2 className="text-2xl font-bold mb-1">Avaliação do Livro</h2>
+                            <h2 id="review-modal-title" className="text-2xl font-bold mb-1">Avaliação do Livro</h2>
                             <p className="text-gray-600 mb-4">{livro.titulo}</p>
 
                             <form onSubmit={postarAvaliacao} className="flex flex-col gap-3">
-                                <label className="text-sm font-semibold">Nome:</label>
+                                <label htmlFor="review-name" className="text-sm font-semibold">Nome:</label>
                                 <input
+                                    id="review-name"
                                     type="text"
                                     placeholder="Escreva seu nome"
                                     value={nome}
@@ -247,8 +239,9 @@ function LivroDetalhe() {
                                     className="border rounded-lg p-2"
                                 />
 
-                                <label className="text-sm font-semibold">Comentário do livro:</label>
+                                <label htmlFor="review-comment" className="text-sm font-semibold">Comentário do livro:</label>
                                 <textarea
+                                    id="review-comment"
                                     placeholder="Escreva seu comentário"
                                     rows="4"
                                     value={comentario}
@@ -256,12 +249,13 @@ function LivroDetalhe() {
                                     className="border rounded-lg p-2"
                                 />
 
-                                <label className="text-sm font-semibold">Nota do livro:</label>
+                                <label htmlFor="review-rating" className="text-sm font-semibold">Nota do livro:</label>
                                 <input
+                                    id="review-rating"
                                     type="number"
-                                    min="0"
+                                    min="1"
                                     max="5"
-                                    placeholder="Nota de 0 a 5"
+                                    placeholder="Nota de 1 a 5"
                                     value={nota}
                                     onChange={(e) => setNota(e.target.value)}
                                     className="border rounded-lg p-2"

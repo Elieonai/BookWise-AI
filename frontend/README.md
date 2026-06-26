@@ -1,16 +1,63 @@
-# React + Vite
+# BookWise AI Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend React/Vite da aplicação BookWise AI.
 
-Currently, two official plugins are available:
+## Variáveis de ambiente
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Crie um `.env` com base em `env.example` para conectar o frontend ao Firestore:
 
-## React Compiler
+```bash
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+VITE_FIREBASE_MEASUREMENT_ID=...
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Configure `VITE_AI_API_URL` com a URL da API publicada no Render, incluindo `/api` no final:
 
-## Expanding the ESLint configuration
+```bash
+VITE_AI_API_URL=https://bookwise-ai-1.onrender.com/api
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+A chave `GEMINI_API_KEY` deve ficar apenas nas variáveis de ambiente do Render, nunca no frontend.
+
+## Integrações de dados
+
+O frontend usa duas fontes:
+
+- Firestore direto via Firebase Web SDK para catálogo e resenhas.
+- API Express configurada em `VITE_AI_API_URL` para ranking e recursos de IA.
+
+Endpoints da API consumidos ou disponíveis para compatibilidade:
+
+| Método | Endpoint relativo a `VITE_AI_API_URL` | Uso no frontend                    |
+| :----: | ------------------------------------- | ---------------------------------- |
+|   GET  | `/books/top-rated`                    | Home, livros mais bem avaliados    |
+|   GET  | `/books`                              | Compatibilidade/backend Swagger    |
+|   GET  | `/books/:id`                          | Compatibilidade/backend Swagger    |
+|   GET  | `/reviews`                            | Compatibilidade/backend Swagger    |
+|   GET  | `/reviews/:bookId`                    | Compatibilidade/backend Swagger    |
+|  POST  | `/reviews`                            | Compatibilidade/backend Swagger    |
+|   GET  | `/ai/recommendations/:bookTitle`      | Detalhe do livro, recomendações IA |
+|   GET  | `/ai/reviews-summary/:bookId`         | Resumo de avaliações por IA        |
+|  POST  | `/ai/semantic-search`                 | Busca semântica por IA/fallback    |
+
+No desenvolvimento local, use:
+
+```bash
+VITE_AI_API_URL=http://localhost:3000/api
+```
+
+## Comandos
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+```
+
+O build foi validado com Node `20.17`.

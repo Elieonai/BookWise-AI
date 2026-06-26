@@ -1,63 +1,90 @@
-import { useBooks } from "../hooks/useBooks";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import BookList from "../components/BookList";
 import SearchBar from "../components/SearchBar";
 import Footer from "../components/Footer";
+import { useBooks } from "../hooks/useBooks";
+
+const apiBaseUrl = import.meta.env.VITE_AI_API_URL?.replace(/\/$/, "");
 
 export default function BooksListPage() {
     const { books, loading, error } = useBooks();
-
     const [search, setSearch] = useState("");
-    const [searchResults, setSearchResults] = useState(null); // null = sem busca ativa
-    const [searchLoading, setSearchLoading] = useState(false);
-    const [searchType, setSearchType] = useState(null);
-
     const [page, setPage] = useState(1);
+    const [apiSearchResults, setApiSearchResults] = useState(null);
+    const [apiSearchType, setApiSearchType] = useState("");
+    const [apiSearchLoading, setApiSearchLoading] = useState(false);
+    const [apiSearchError, setApiSearchError] = useState("");
     const perPage = 6;
 
-    // Debounce — só chama a API 600ms depois que o usuário parar de digitar
-    useEffect(() => {
-        if (search.trim().length < 2) {
-            setSearchResults(null);
-            setSearchType(null);
-            return;
-        }
-
-        const timer = setTimeout(async () => {
-            try {
-                setSearchLoading(true);
-
-                const res = await fetch('/api/ai/semantic-search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: search })
-                });
-
-                const data = await res.json();
-                setSearchResults(data.results);
-                setSearchType(data.type);
-
-            } catch (err) {
-                console.error('Erro na busca semântica:', err);
-                setSearchResults([]);
-            } finally {
-                setSearchLoading(false);
-            }
-        }, 600);
-
-        return () => clearTimeout(timer);
-    }, [search]);
-
-    useEffect(() => {
-        setPage(1);
-    }, [search]);
-
-    const activeBooks = searchResults !== null ? searchResults : books;
-
+    const firestoreFilteredBooks = books.filter(book =>
+        book.titulo?.toLowerCase().includes(search.toLowerCase())
+    );
+    const activeBooks = apiSearchResults ?? firestoreFilteredBooks;
+    const showMissingApiMessage = search.trim().length >= 2 && !apiBaseUrl;
     const maxPage = Math.max(1, Math.ceil(activeBooks.length / perPage));
     const startIndex = (page - 1) * perPage;
     const booksToShow = activeBooks.slice(startIndex, startIndex + perPage);
+
+    function handleSearchChange(value) {
+        setSearch(value);
+        setPage(1);
+        setApiSearchError("");
+        setApiSearchType("");
+
+        if (value.trim().length < 2) {
+            setApiSearchResults(null);
+            setApiSearchLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        const normalizedSearch = search.trim();
+
+        if (normalizedSearch.length < 2) {
+            return undefined;
+        }
+
+        if (!apiBaseUrl) {
+            return undefined;
+        }
+
+        const controller = new AbortController();
+        const timer = setTimeout(async () => {
+            try {
+                setApiSearchLoading(true);
+
+                const response = await fetch(`${apiBaseUrl}/ai/semantic-search`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: normalizedSearch }),
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao buscar livros pela API.");
+                }
+
+                const data = await response.json();
+
+                setApiSearchResults(data.results ?? []);
+                setApiSearchType(data.type ?? "");
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    console.error("Erro na busca inteligente:", err);
+                    setApiSearchResults(null);
+                    setApiSearchError("Busca inteligente indisponível. Exibindo resultados do Firestore.");
+                }
+            } finally {
+                setApiSearchLoading(false);
+            }
+        }, 600);
+
+        return () => {
+            controller.abort();
+            clearTimeout(timer);
+        };
+    }, [search]);
 
     if (loading) {
         return (
@@ -90,27 +117,44 @@ export default function BooksListPage() {
                 </section>
 
                 <section className="mb-10">
-                    <SearchBar value={search} onChange={setSearch} />
+                    <SearchBar
+                        value={search}
+                        onChange={handleSearchChange}
+                    />
 
-                    {/* Indicador do tipo de busca */}
-                    {searchType === "semantic" && (
+                    {apiSearchLoading && (
                         <p className="text-center text-sm text-lime-700 mt-2">
-                            ✨ Resultados por busca inteligente
+                            Buscando na API inteligente...
                         </p>
                     )}
-                    {searchType === "fallback" && (
-                        <p className="text-center text-sm text-yellow-600 mt-2">
-                            ⚠️ Busca inteligente indisponível. Exibindo resultados aproximados.
+
+                    {apiSearchType === "semantic" && (
+                        <p className="text-center text-sm text-lime-700 mt-2">
+                            Resultados encontrados pela API inteligente.
                         </p>
                     )}
-                    {searchType === "direct" && (
-                        <p className="text-center text-sm text-gray-500 mt-2">
-                            📚 Resultado direto do catálogo
+
+                    {apiSearchType === "fallback" && (
+                        <p className="text-center text-sm text-yellow-700 mt-2">
+                            API inteligente indisponível. Exibindo resultados aproximados.
                         </p>
                     )}
-                    {searchLoading && (
-                        <p className="text-center text-sm text-lime-600 mt-2">
-                            🔍 Buscando...
+
+                    {apiSearchType === "direct" && (
+                        <p className="text-center text-sm text-gray-600 mt-2">
+                            Resultado direto do catálogo usado pela API.
+                        </p>
+                    )}
+
+                    {apiSearchError && (
+                        <p className="text-center text-sm text-yellow-700 mt-2">
+                            {apiSearchError}
+                        </p>
+                    )}
+
+                    {showMissingApiMessage && (
+                        <p className="text-center text-sm text-yellow-700 mt-2">
+                            API de busca inteligente não configurada. Exibindo resultados do Firestore.
                         </p>
                     )}
                 </section>
@@ -126,18 +170,24 @@ export default function BooksListPage() {
                 {activeBooks.length > 0 && (
                     <div className="flex justify-center items-center gap-6 mt-8">
                         <button
+                            type="button"
                             onClick={() => setPage(prev => Math.max(prev - 1, 1))}
                             disabled={page === 1}
-                            className="bg-lime-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-lime-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                            className="bg-lime-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-lime-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                             Anterior
                         </button>
 
-                        <span className="text-lime-900">Página {page}</span>
+                        <span className="text-lime-900">
+                            Página {page}
+                        </span>
 
                         <button
+                            type="button"
                             onClick={() => setPage(prev => Math.min(prev + 1, maxPage))}
                             disabled={page >= maxPage}
-                            className="bg-lime-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-lime-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                            className="bg-lime-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-lime-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                             Próximo
                         </button>
                     </div>

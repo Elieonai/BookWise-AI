@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import ReviewCard from "../components/reviewCard";
 import Footer from "../components/Footer";
 import { getBookById } from "../services/booksService";
+import ResumeCard from "../components/ResumeCard";
 
 function LivroDetalhe() {
     const { id } = useParams();
@@ -11,6 +12,7 @@ function LivroDetalhe() {
     const [modalAberto, setModalAberto] = useState(false);
 
     const [livro, setLivro] = useState(null);
+    const [resume, setResume] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [recomendacoes, setRecomendacoes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,6 +29,9 @@ function LivroDetalhe() {
 
                 const livroData = await getBookById(id);
                 setLivro(livroData);
+
+                const resumeData = await fetch(`api/ai/reviews-summary/${id}`)
+                setResume(resumeData);
 
                 const reviewsRes = await fetch(`/api/reviews/${id}`);
                 const reviewsData = await reviewsRes.json();
@@ -87,6 +92,9 @@ function LivroDetalhe() {
     if (loading) return <p className="text-center mt-10 text-gray-500">Carregando...</p>;
     if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
     if (!livro) return <p className="text-center mt-10 text-gray-500">Livro não encontrado.</p>;
+
+    console.log(<ResumeCard />);
+    
 
     return (
         <>
@@ -153,6 +161,9 @@ function LivroDetalhe() {
                 {/* Reviews */}
                 <section>
                     <h2 className="text-4xl">Resenhas da comunidade</h2>
+
+                    {/* RESUMO DE REVIEWS */}
+                    <ResumeCard livro={livro.titulo} resumo={resume}/>
 
                     <button
                         type="button"

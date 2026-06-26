@@ -23,7 +23,7 @@ function Home() {
           </h2>
 
           <p className="text-gray-600 mb-8">
-            Descubra os livros favoritos da comunidade BookWise.
+            Descubra os livros favoritos da comunidade Capiventure.
           </p>
 
           {loading && (

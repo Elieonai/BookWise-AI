@@ -1,27 +1,20 @@
-{/*Junção de dados, estado e lógica de busca*/}
-
-{/*Controle de livros, busca, carregamento, erro e filtro de livros*/}
-
 import { useEffect, useState } from "react";
 import { getBooks } from "../services/booksService";
 
 export function useBooks() {
     const [books, setBooks] = useState([]);
-    const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         async function loadBooks() {
             try {
                 setLoading(true);
-
+                setError("");
                 const data = await getBooks();
                 setBooks(data);
-
             } catch (err) {
-                setError(err);
-
+                setError(err.message || "Erro ao carregar livros.");
             } finally {
                 setLoading(false);
             }
@@ -30,16 +23,5 @@ export function useBooks() {
         loadBooks();
     }, []);
 
-    const filteredBooks = books.filter((book) =>
-    book.titulo.toLowerCase().includes(search.toLowerCase())
-    );
-
-    return {
-        books: filteredBooks,
-        search,
-        setSearch,
-        loading,
-        error,
-    };
-
+    return { books, loading, error };
 }

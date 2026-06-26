@@ -1,4 +1,4 @@
-# BookWise AI
+# Capiventure AI
 
 Plataforma colaborativa de reviews de livros com recomendações inteligentes utilizando IA desenvolvida como projeto final do Bootcamp Full Stack da SoulCode Academy com a Accenture.
 
@@ -44,6 +44,8 @@ http://localhost:5173
 
 ## Endpoints da API
 
+Coleção para importar no [postman](https://github.com/Elieonai/BookWise-AI/blob/main/backend/Capiventure%20AI.postman_collection.json).
+
 | Método | Endpoint         | Descrição                                               |
 | :----: | ---------------- | ------------------------------------------------------  |
 |   GET  | `/api/books`     | Retorna todos os livros cadastrados em formato resumido |
@@ -54,6 +56,13 @@ http://localhost:5173
 | :----: | ----------------------------- | ------------------------------------------ |
 |   GET  | `/api/reviews/:bookId`        | Lista todas as reviews do livro específico |
 |  POST  | `/api/reviews`                | Cria uma review nova para um livro         |
+
+
+| Método | Endpoint                              | Descrição                            |
+| :----: | ------------------------------------- | ------------------------------------ |
+|   GET  | `/api/ai/recommendations/:bookTitulo` | Recomenda livros baseados no título  |
+|   GET  | `/api/ai/reviews-summary/:bookId`     | Faz um resumo das reviews de um livro|
+|  POST  | `/api/ai/semantic-search`             | Faz uma pesquisa semântica nos livros|
 
 ## Equipe
 
